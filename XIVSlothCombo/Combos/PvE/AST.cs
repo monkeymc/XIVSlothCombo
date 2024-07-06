@@ -147,42 +147,6 @@ namespace XIVSlothCombo.Combos.PvE
                 AST_ST_DPS_CombustUptime_Threshold = new("AST_ST_DPS_CombustUptime_Threshold");
         }
 
-        internal class AST_Cards_DrawOnPlay : CustomCombo
-        {
-
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Cards_DrawOnPlay;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-            {
-                if (actionID is Play)
-                {
-                    var haveCard = HasEffect(Buffs.BalanceDrawn) || HasEffect(Buffs.BoleDrawn) || HasEffect(Buffs.ArrowDrawn) || HasEffect(Buffs.SpearDrawn) || HasEffect(Buffs.EwerDrawn) || HasEffect(Buffs.SpireDrawn);
-                    var cardDrawn = Gauge.DrawnCard;
-
-                    if (IsEnabled(CustomComboPreset.AST_Cards_AstrodyneOnPlay) && ActionReady(Astrodyne) && !Gauge.ContainsSeal(SealType.NONE) &&
-                        (Gauge.DrawnCard != CardType.NONE || HasCharges(Draw)))
-                        return Astrodyne;
-
-                    if (haveCard)
-                    {
-                        if (HasEffect(Buffs.ClarifyingDraw) && IsEnabled(CustomComboPreset.AST_Cards_Redraw))
-                        {
-                            if ((cardDrawn is CardType.BALANCE or CardType.BOLE && Gauge.Seals.Contains(SealType.SUN)) ||
-                                (cardDrawn is CardType.ARROW or CardType.EWER && Gauge.Seals.Contains(SealType.MOON)) ||
-                                (cardDrawn is CardType.SPEAR or CardType.SPIRE && Gauge.Seals.Contains(SealType.CELESTIAL)))
-                                return Redraw;
-                        }
-
-                        return OriginalHook(Play);
-                    }
-
-                    return OriginalHook(Draw);
-                }
-
-                return actionID;
-            }
-        }
-
         internal class AST_Benefic : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Benefic;
@@ -247,84 +211,65 @@ namespace XIVSlothCombo.Combos.PvE
                         LocalPlayer.CurrentMp <= Config.AST_LucidDreaming &&
                         CanSpellWeave(actionID))
                         return All.LucidDreaming;
+                }
 
-                    //Astrodyne
-                    if (IsEnabled(CustomComboPreset.AST_DPS_Astrodyne) &&
-                        ActionReady(Astrodyne) &&
-                        !Gauge.ContainsSeal(SealType.NONE) &&
-                        CanSpellWeave(actionID))
-                        return Astrodyne;
+                //Play Card
+                if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) &&
+                    ActionReady(Play) &&
+                    Gauge.DrawnCards is not CardType.NONE &&
+                    CanSpellWeave(actionID) &&
+                    spellsSinceDraw >= Config.AST_ST_DPS_Play_SpeedSetting &&
+                    !WasLastAction(Redraw))
+                    return OriginalHook(Play);
 
-                    //Redraw Card
-                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay_Redraw) && HasEffect(Buffs.ClarifyingDraw) && ActionReady(Redraw))
+                //Card Draw
+                if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
+                    ActionReady(Draw) &&
+                    Gauge.DrawnCards is CardType.NONE &&
+                    CanDelayedWeave(actionID))
+                    return Draw;
+
+                //Divination
+                if (IsEnabled(CustomComboPreset.AST_DPS_Divination) &&
+                    ActionReady(Divination) &&
+                    !HasEffectAny(Buffs.Divination) && //Overwrite protection
+                    GetTargetHPPercent() > Config.AST_DPS_DivinationOption &&
+                    CanDelayedWeave(actionID) &&
+                    ActionWatching.NumberOfGcdsUsed >= 3)
+                    return Divination;
+
+                //Minor Arcana / Lord of Crowns
+                if (ActionReady(OriginalHook(MinorArcana)) &&
+                    ((IsEnabled(CustomComboPreset.AST_DPS_AutoCrownDraw) && Gauge.DrawnCrownCard is CardType.NONE) ||
+                    (IsEnabled(CustomComboPreset.AST_DPS_LazyLord) && Gauge.DrawnCrownCard is CardType.LORD && HasBattleTarget())) &&
+                    CanDelayedWeave(actionID))
+                    return OriginalHook(MinorArcana);
+
+                if (HasBattleTarget())
+                {
+                    //Combust
+                    if (IsEnabled(CustomComboPreset.AST_ST_DPS_CombustUptime) &&
+                        !GravityList.Contains(actionID) &&
+                        LevelChecked(Combust))
                     {
-                        var cardDrawn = Gauge.DrawnCard;
-                        if (((cardDrawn is CardType.BALANCE or CardType.BOLE && Gauge.Seals.Contains(SealType.SUN)) ||
-                            (cardDrawn is CardType.ARROW or CardType.EWER && Gauge.Seals.Contains(SealType.MOON)) ||
-                            (cardDrawn is CardType.SPEAR or CardType.SPIRE && Gauge.Seals.Contains(SealType.CELESTIAL))) &&
-                            CanSpellWeave(actionID) &&
-                            spellsSinceDraw >= (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) ? Config.AST_ST_DPS_Play_SpeedSetting : 1))
-                            return Redraw;
-                    }
+                        //Grab current DoT via OriginalHook, grab it's fellow debuff ID from Dictionary, then check for the debuff
+                        uint dot = OriginalHook(Combust);
+                        Status? dotDebuff = FindTargetEffect(CombustList[dot]);
+                        float refreshtimer = Config.AST_ST_DPS_CombustUptime_Adv ? Config.AST_ST_DPS_CombustUptime_Threshold : 3;
 
-                    //Play Card
-                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) &&
-                        ActionReady(Play) &&
-                        Gauge.DrawnCard is not CardType.NONE &&
-                        CanSpellWeave(actionID) &&
-                        spellsSinceDraw >= Config.AST_ST_DPS_Play_SpeedSetting &&
-                        !WasLastAction(Redraw))
-                        return OriginalHook(Play);
-
-                    //Card Draw
-                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
-                        ActionReady(Draw) &&
-                        Gauge.DrawnCard is CardType.NONE &&
-                        CanDelayedWeave(actionID))
-                        return Draw;
-
-                    //Divination
-                    if (IsEnabled(CustomComboPreset.AST_DPS_Divination) &&
-                        ActionReady(Divination) &&
-                        !HasEffectAny(Buffs.Divination) && //Overwrite protection
-                        GetTargetHPPercent() > Config.AST_DPS_DivinationOption &&
-                        CanDelayedWeave(actionID) &&
-                        ActionWatching.NumberOfGcdsUsed >= 3)
-                        return Divination;
-
-                    //Minor Arcana / Lord of Crowns
-                    if (ActionReady(OriginalHook(MinorArcana)) &&
-                        ((IsEnabled(CustomComboPreset.AST_DPS_AutoCrownDraw) && Gauge.DrawnCrownCard is CardType.NONE) ||
-                        (IsEnabled(CustomComboPreset.AST_DPS_LazyLord) && Gauge.DrawnCrownCard is CardType.LORD && HasBattleTarget())) &&
-                        CanDelayedWeave(actionID))
-                        return OriginalHook(MinorArcana);
-
-                    if (HasBattleTarget())
-                    {
-                        //Combust
-                        if (IsEnabled(CustomComboPreset.AST_ST_DPS_CombustUptime) &&
-                            !GravityList.Contains(actionID) &&
-                            LevelChecked(Combust))
-                        {
-                            //Grab current DoT via OriginalHook, grab it's fellow debuff ID from Dictionary, then check for the debuff
-                            uint dot = OriginalHook(Combust);
-                            Status? dotDebuff = FindTargetEffect(CombustList[dot]);
-                            float refreshtimer = Config.AST_ST_DPS_CombustUptime_Adv ? Config.AST_ST_DPS_CombustUptime_Threshold : 3;
-
-                            if (IsEnabled(CustomComboPreset.AST_Variant_SpiritDart) &&
-                                IsEnabled(Variant.VariantSpiritDart) &&
-                                (sustainedDamage is null || sustainedDamage?.RemainingTime <= 3) &&
-                                CanSpellWeave(actionID))
-                                return Variant.VariantSpiritDart;
+                        if (IsEnabled(CustomComboPreset.AST_Variant_SpiritDart) &&
+                            IsEnabled(Variant.VariantSpiritDart) &&
+                            (sustainedDamage is null || sustainedDamage?.RemainingTime <= 3) &&
+                            CanSpellWeave(actionID))
+                            return Variant.VariantSpiritDart;
 
 
-                            if ((dotDebuff is null || dotDebuff.RemainingTime <= refreshtimer) &&
-                                GetTargetHPPercent() > Config.AST_DPS_CombustOption)
-                                return dot;
+                        if ((dotDebuff is null || dotDebuff.RemainingTime <= refreshtimer) &&
+                            GetTargetHPPercent() > Config.AST_DPS_CombustOption)
+                            return dot;
 
-                            //AlterateMode idles as Malefic
-                            if (AlternateMode) return OriginalHook(Malefic);
-                        }
+                        //AlterateMode idles as Malefic
+                        if (AlternateMode) return OriginalHook(Malefic);
                     }
                 }
                 return actionID;
@@ -337,12 +282,8 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID is AspectedHelios)
+                if (actionID is Helios)
                 {
-                    //Level check to exit if we can't use
-                    if (!LevelChecked(AspectedHelios))
-                        return Helios;
-
                     if (IsEnabled(CustomComboPreset.AST_AoE_SimpleHeals_LazyLady) &&
                         ActionReady(MinorArcana) &&
                         InCombat() &&
@@ -374,31 +315,6 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.AspectedHelios) && FindEffect(Buffs.AspectedHelios).RemainingTime > 2)
                         return Helios;
                 }
-
-                return actionID;
-            }
-        }
-
-        //Works With AST_Cards_DrawOnPlay as a feature, or by itself if AST_Cards_DrawOnPlay is disabled.
-        //Do not do ConflictingCombos with AST_Cards_DrawOnPlay
-        internal class AST_Cards_AstrodyneOnPlay : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Cards_AstrodyneOnPlay;
-
-            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
-                => actionID is Play && !IsEnabled(CustomComboPreset.AST_Cards_DrawOnPlay) && !Gauge.ContainsSeal(SealType.NONE)
-                    ? Astrodyne
-                    : actionID;
-        }
-
-        internal class AST_Cards_RedrawStandalone : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Cards_RedrawStandalone;
-
-            protected override uint Invoke(uint actionID, uint lastComboActionID, float comboTime, byte level)
-            {
-                if (actionID is Draw && HasEffect(Buffs.ClarifyingDraw))
-                    return Redraw;
 
                 return actionID;
             }
