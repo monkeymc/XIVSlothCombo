@@ -80,16 +80,16 @@ namespace XIVSlothCombo.Combos.PvE
         {
             public static UserInt
                 DRG_Variant_Cure = new("DRG_VariantCure"),
-                DRG_ST_LitanyHP = new("DRG_ST_LitanyHP",2),
-                DRG_ST_SightHP = new("DRG_ST_SightHP",2),
-                DRG_ST_LanceChargeHP = new("DRG_ST_LanceChargeHP",2),
-                DRG_ST_SecondWind_Threshold = new("DRG_STSecondWindThreshold",25),
-                DRG_ST_Bloodbath_Threshold = new("DRG_STBloodbathThreshold",40),
-                DRG_AoE_LitanyHP = new("DRG_AoE_LitanyHP",5),
-                DRG_AoE_SightHP = new("DRG_AoE_SightHP",5),
-                DRG_AoE_LanceChargeHP = new("DRG_AoE_LanceChargeHP",5),
-                DRG_AoE_SecondWind_Threshold = new("DRG_AoE_SecondWindThreshold",25),
-                DRG_AoE_Bloodbath_Threshold = new("DRG_AoE_BloodbathThreshold",40);
+                DRG_ST_LitanyHP = new("DRG_ST_LitanyHP", 2),
+                DRG_ST_SightHP = new("DRG_ST_SightHP", 2),
+                DRG_ST_LanceChargeHP = new("DRG_ST_LanceChargeHP", 2),
+                DRG_ST_SecondWind_Threshold = new("DRG_STSecondWindThreshold", 25),
+                DRG_ST_Bloodbath_Threshold = new("DRG_STBloodbathThreshold", 40),
+                DRG_AoE_LitanyHP = new("DRG_AoE_LitanyHP", 5),
+                DRG_AoE_SightHP = new("DRG_AoE_SightHP", 5),
+                DRG_AoE_LanceChargeHP = new("DRG_AoE_LanceChargeHP", 5),
+                DRG_AoE_SecondWind_Threshold = new("DRG_AoE_SecondWindThreshold", 25),
+                DRG_AoE_Bloodbath_Threshold = new("DRG_AoE_BloodbathThreshold", 40);
         }
 
         internal class DRG_ST_SimpleMode : CustomCombo
@@ -140,8 +140,8 @@ namespace XIVSlothCombo.Combos.PvE
 
                         //Life Surge Feature
                         if (ActionReady(LifeSurge) && AnimationLock.CanDRGWeave(LifeSurge) && !HasEffect(Buffs.LifeSurge) &&
-                            ((WasLastWeaponskill(WheelingThrust) && LevelChecked(Drakesbane)) || 
-                            (WasLastWeaponskill(FangAndClaw) && LevelChecked(Drakesbane))||
+                            ((WasLastWeaponskill(WheelingThrust) && LevelChecked(Drakesbane)) ||
+                            (WasLastWeaponskill(FangAndClaw) && LevelChecked(Drakesbane)) ||
                             (WasLastWeaponskill(OriginalHook(VorpalThrust)) && LevelChecked(OriginalHook(FullThrust)))))
                             return LifeSurge;
 
@@ -154,21 +154,21 @@ namespace XIVSlothCombo.Combos.PvE
                             return Geirskogul;
 
                         //(High) Jump Feature   
-                        if (ActionReady(OriginalHook(Jump)) && !IsMoving && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
+                        if (ActionReady(OriginalHook(Jump)) && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
                             return OriginalHook(Jump);
 
-                        //Dives Feature
-                        if (!IsMoving && ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
+                        //Dragonfire Dive Feature
+                        if (ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
                             return DragonfireDive;
 
                         //StarDives Feature
                         if (AnimationLock.CanDRGWeave(Stardiver) &&
-                            gauge.IsLOTDActive && ActionReady(Stardiver) && !IsMoving && GetBuffStacks(Buffs.NastrondReady) == 2)
+                            gauge.IsLOTDActive && ActionReady(Stardiver) && GetBuffStacks(Buffs.NastrondReady) == 2)
                             return Stardiver;
 
                         //StarDives Feature
                         if (AnimationLock.CanDRGWeave(Starcross) &&
-                            HasEffect(Buffs.StarcrossReady) && !IsMoving && WasLastAbility(Stardiver))
+                            HasEffect(Buffs.StarcrossReady) && WasLastAbility(Stardiver))
                             return OriginalHook(Stardiver);
 
                         //Dives Feature
@@ -302,9 +302,9 @@ namespace XIVSlothCombo.Combos.PvE
                                (WasLastWeaponskill(OriginalHook(VorpalThrust)) && LevelChecked(OriginalHook(FullThrust)))))
                                 return LifeSurge;
 
-                                //Wyrmwind Thrust Feature
-                                if (IsEnabled(CustomComboPreset.DRG_ST_Wyrmwind) &&
-                                gauge.FirstmindsFocusCount is 2 && AnimationLock.CanDRGWeave(WyrmwindThrust))
+                            //Wyrmwind Thrust Feature
+                            if (IsEnabled(CustomComboPreset.DRG_ST_Wyrmwind) &&
+                            gauge.FirstmindsFocusCount is 2 && AnimationLock.CanDRGWeave(WyrmwindThrust))
                                 return WyrmwindThrust;
 
                             //Geirskogul Feature
@@ -314,24 +314,24 @@ namespace XIVSlothCombo.Combos.PvE
 
                             //(High) Jump Feature   
                             if (IsEnabled(CustomComboPreset.DRG_ST_HighJump) &&
-                                ActionReady(OriginalHook(Jump)) && !IsMoving && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
+                                ActionReady(OriginalHook(Jump)) && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
                                 return OriginalHook(Jump);
 
-                            //Dives Feature
+                            //Dragonfire Dive Feature
                             if (IsEnabled(CustomComboPreset.DRG_ST_Dives_Dragonfire) &&
-                                !IsMoving && ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
+                                ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
                                 return DragonfireDive;
 
                             //StarDives Feature
                             if (IsEnabled(CustomComboPreset.DRG_ST_Stardiver) &&
                                 AnimationLock.CanDRGWeave(Stardiver) &&
-                                gauge.IsLOTDActive && ActionReady(Stardiver) && !IsMoving && GetBuffStacks(Buffs.NastrondReady) == 2)
+                                gauge.IsLOTDActive && ActionReady(Stardiver) && GetBuffStacks(Buffs.NastrondReady) == 2)
                                 return Stardiver;
 
                             //StarDives Feature
                             if (IsEnabled(CustomComboPreset.DRG_ST_Starcross) &&
                                 AnimationLock.CanDRGWeave(Starcross) &&
-                                HasEffect(Buffs.StarcrossReady) && !IsMoving && WasLastAbility(Stardiver))
+                                HasEffect(Buffs.StarcrossReady) && WasLastAbility(Stardiver))
                                 return OriginalHook(Stardiver);
 
                             //Dives Feature
@@ -464,21 +464,21 @@ namespace XIVSlothCombo.Combos.PvE
                             return Geirskogul;
 
                         //(High) Jump Feature   
-                        if (ActionReady(OriginalHook(Jump)) && !IsMoving && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
+                        if (ActionReady(OriginalHook(Jump)) && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
                             return OriginalHook(Jump);
 
                         //Dives Feature
-                        if (!IsMoving && ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
+                        if (ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
                             return DragonfireDive;
 
                         //StarDives Feature
                         if (AnimationLock.CanDRGWeave(Stardiver) &&
-                            gauge.IsLOTDActive && ActionReady(Stardiver) && !IsMoving && GetBuffStacks(Buffs.NastrondReady) == 2)
+                            gauge.IsLOTDActive && ActionReady(Stardiver) && GetBuffStacks(Buffs.NastrondReady) == 2)
                             return Stardiver;
 
                         //StarDives Feature
                         if (AnimationLock.CanDRGWeave(Starcross) &&
-                            HasEffect(Buffs.StarcrossReady) && !IsMoving && WasLastAbility(Stardiver))
+                            HasEffect(Buffs.StarcrossReady) && WasLastAbility(Stardiver))
                             return OriginalHook(Stardiver);
 
                         //Dives Feature
@@ -592,24 +592,24 @@ namespace XIVSlothCombo.Combos.PvE
 
                             //(High) Jump Feature   
                             if (IsEnabled(CustomComboPreset.DRG_AoE_HighJump) &&
-                                ActionReady(OriginalHook(Jump)) && !IsMoving && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
+                                ActionReady(OriginalHook(Jump)) && AnimationLock.CanDRGWeave(OriginalHook(Jump)))
                                 return OriginalHook(Jump);
 
                             //Dives Feature
                             if (IsEnabled(CustomComboPreset.DRG_AoE_Dragonfire_Dive) &&
-                                !IsMoving && ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
+                               ActionReady(DragonfireDive) && AnimationLock.CanDRGWeave(DragonfireDive) && (GetBuffStacks(Buffs.NastrondReady) == 3 || !LevelChecked(Nastrond)))
                                 return DragonfireDive;
 
                             //StarDives Feature
                             if (IsEnabled(CustomComboPreset.DRG_AoE_Stardiver) &&
                                 AnimationLock.CanDRGWeave(Stardiver) &&
-                                gauge.IsLOTDActive && ActionReady(Stardiver) && !IsMoving && GetBuffStacks(Buffs.NastrondReady) == 2)
+                                gauge.IsLOTDActive && ActionReady(Stardiver) && GetBuffStacks(Buffs.NastrondReady) == 2)
                                 return Stardiver;
 
                             //StarDives Feature
                             if (IsEnabled(CustomComboPreset.DRG_AoE_Starcross) &&
                                 AnimationLock.CanDRGWeave(Starcross) &&
-                                HasEffect(Buffs.StarcrossReady) && !IsMoving && WasLastAbility(Stardiver))
+                                HasEffect(Buffs.StarcrossReady) && WasLastAbility(Stardiver))
                                 return OriginalHook(Stardiver);
 
                             //Dives Feature
