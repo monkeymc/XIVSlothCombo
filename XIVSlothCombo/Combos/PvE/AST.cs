@@ -147,6 +147,31 @@ namespace XIVSlothCombo.Combos.PvE
                 AST_ST_DPS_CombustUptime_Threshold = new("AST_ST_DPS_CombustUptime_Threshold");
         }
 
+        internal class AST_Cards_DrawOnPlay : CustomCombo
+        {
+
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Cards_DrawOnPlay;
+
+            protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
+            {
+                if (actionID is Play)
+                {
+                    var haveCard = HasEffect(Buffs.BalanceDrawn) || HasEffect(Buffs.BoleDrawn) || HasEffect(Buffs.ArrowDrawn) || HasEffect(Buffs.SpearDrawn) || HasEffect(Buffs.EwerDrawn) || HasEffect(Buffs.SpireDrawn);
+                    var cardDrawn = Gauge.DrawnCards[0];
+
+
+                    if (haveCard)
+                    {
+                        return OriginalHook(Play);
+                    }
+
+                    return OriginalHook(Draw);
+                }
+
+                return actionID;
+            }
+        }
+
         internal class AST_Benefic : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Benefic;
@@ -211,23 +236,23 @@ namespace XIVSlothCombo.Combos.PvE
                         LocalPlayer.CurrentMp <= Config.AST_LucidDreaming &&
                         CanSpellWeave(actionID))
                         return All.LucidDreaming;
-                }
 
-                //Play Card
-                if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) &&
-                    ActionReady(Play) &&
-                    Gauge.DrawnCards is not CardType.NONE &&
-                    CanSpellWeave(actionID) &&
-                    spellsSinceDraw >= Config.AST_ST_DPS_Play_SpeedSetting &&
-                    !WasLastAction(Redraw))
-                    return OriginalHook(Play);
 
-                //Card Draw
-                if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
-                    ActionReady(Draw) &&
-                    Gauge.DrawnCards is CardType.NONE &&
-                    CanDelayedWeave(actionID))
-                    return Draw;
+                    //Play Card
+                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) &&
+                        ActionReady(Play) &&
+                        Gauge.DrawnCards[0] is not CardType.NONE &&
+                        CanSpellWeave(actionID) &&
+                        spellsSinceDraw >= Config.AST_ST_DPS_Play_SpeedSetting &&
+                        !WasLastAction(Redraw))
+                        return OriginalHook(Play);
+
+                    //Card Draw
+                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
+                        ActionReady(Draw) &&
+                        Gauge.DrawnCards[0] is CardType.NONE &&
+                        CanDelayedWeave(actionID))
+                        return Draw;
 
                 //Divination
                 if (IsEnabled(CustomComboPreset.AST_DPS_Divination) &&
@@ -315,6 +340,11 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.AspectedHelios) && FindEffect(Buffs.AspectedHelios).RemainingTime > 2)
                         return Helios;
                 }
+
+                return actionID;
+            }
+        }
+
 
                 return actionID;
             }
