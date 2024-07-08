@@ -545,7 +545,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                     //gauss and ricochet outside HC
                     if (CanWeave(actionID) && !gauge.IsOverheated &&
-                        !HasEffect(Buffs.Wildfire) && !WasLastWeaponskill(OriginalHook(Heatblast)))
+                         !HasEffect(Buffs.Wildfire) && !WasLastWeaponskill(OriginalHook(AutoCrossbow)))
                     {
                         if (ActionReady(OriginalHook(GaussRound)) && !WasLastAction(OriginalHook(GaussRound)))
                             return OriginalHook(GaussRound);
@@ -660,13 +660,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                     //gauss and ricochet outside HC
                     if (IsEnabled(CustomComboPreset.MCH_AoE_Adv_GaussRicochet) &&
-                        CanWeave(actionID) && !gauge.IsOverheated && !HasEffect(Buffs.Wildfire) &&
-                        ActionWatching.GetAttackType(ActionWatching.LastAction) != ActionWatching.ActionAttackType.Ability)
+                        CanWeave(actionID) && !gauge.IsOverheated &&
+                        !HasEffect(Buffs.Wildfire) && !WasLastWeaponskill(OriginalHook(AutoCrossbow)))
                     {
-                        if (ActionReady(OriginalHook(GaussRound)))
+                        if (ActionReady(OriginalHook(GaussRound)) && !WasLastAction(OriginalHook(GaussRound)))
                             return OriginalHook(GaussRound);
 
-                        if (ActionReady(OriginalHook(Ricochet)))
+                        if (ActionReady(OriginalHook(Ricochet)) && !WasLastAction(OriginalHook(Ricochet)))
                             return OriginalHook(Ricochet);
                     }
 
@@ -731,11 +731,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                 if (actionID is GaussRound or Ricochet && CanWeave(actionID))
                 {
-                    if (ActionReady(OriginalHook(GaussRound)))
-                        return OriginalHook(GaussRound);
+                    {
+                        if (ActionReady(OriginalHook(GaussRound)) && GetRemainingCharges(OriginalHook(GaussRound)) >= GetRemainingCharges(OriginalHook(Ricochet)))
+                            return OriginalHook(GaussRound);
 
-                    if (ActionReady(OriginalHook(Ricochet)))
-                        return OriginalHook(Ricochet);
+                        if (ActionReady(OriginalHook(Ricochet)) && GetRemainingCharges(OriginalHook(Ricochet)) > GetRemainingCharges(OriginalHook(GaussRound)))
+                            return OriginalHook(Ricochet);
+                    }
                 }
 
                 return actionID;
