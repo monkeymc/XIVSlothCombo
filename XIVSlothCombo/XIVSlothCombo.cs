@@ -44,14 +44,14 @@ namespace XIVSlothCombo
 
         public static readonly List<uint> DisabledJobsPVE = new List<uint>()
         {
-            ADV.JobID,
+            //ADV.JobID,
             AST.JobID,
             BLM.JobID,
             //BLU.JobID,
             BRD.JobID,
             DNC.JobID,
             DOL.JobID,
-            DRG.JobID,
+            //DRG.JobID,
             DRK.JobID,
             //GNB.JobID,
             //MCH.JobID,
@@ -60,7 +60,7 @@ namespace XIVSlothCombo
             //PCT.JobID,
             //PLD.JobID,
             //RDM.JobID,
-            RPR.JobID,
+            //RPR.JobID,
             SAM.JobID,
             //SCH.JobID,
             //SGE.JobID,

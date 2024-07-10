@@ -2,7 +2,6 @@
 using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Game.ClientState.Statuses;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using XIVSlothCombo.Combos.PvE.Content;
@@ -308,12 +307,8 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID is AspectedHelios)
+                if (actionID is Helios)
                 {
-                    //Level check to exit if we can't use
-                    if (!LevelChecked(AspectedHelios))
-                        return Helios;
-
                     if (IsEnabled(CustomComboPreset.AST_AoE_SimpleHeals_LazyLady) &&
                         ActionReady(MinorArcana) &&
                         InCombat() &&
@@ -345,20 +340,6 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.AspectedHelios) && FindEffect(Buffs.AspectedHelios).RemainingTime > 2)
                         return Helios;
                 }
-
-                return actionID;
-            }
-        }
-
-
-        internal class AST_Cards_RedrawStandalone : CustomCombo
-        {
-            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.AST_Cards_RedrawStandalone;
-
-            protected override uint Invoke(uint actionID, uint lastComboActionID, float comboTime, byte level)
-            {
-                if (actionID is Draw && HasEffect(Buffs.ClarifyingDraw))
-                    return Redraw;
 
                 return actionID;
             }

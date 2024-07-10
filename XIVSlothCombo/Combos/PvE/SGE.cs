@@ -30,6 +30,7 @@ namespace XIVSlothCombo.Combos.PvE
             Holos = 24310,
             EukrasianDiagnosis = 24291,
             EukrasianPrognosis = 24292,
+            EukrasianPrognosis2 = 37034,
             Egeiro = 24287,
 
             // DPS
