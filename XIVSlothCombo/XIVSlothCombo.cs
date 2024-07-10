@@ -24,6 +24,7 @@ using System.Reflection;
 using Dalamud.Utility;
 using XIVSlothCombo.Attributes;
 using Dalamud.Interface.Windowing;
+using XIVSlothCombo.CustomComboNS.Functions;
 
 namespace XIVSlothCombo
 {
@@ -618,6 +619,16 @@ namespace XIVSlothCombo
                             Service.ChatGui.Print("Unable to write Debug log.");
                             break;
                         }
+                    }
+                case "ogcd":
+                    {
+                        var parameter = argumentsParts[1];
+                        if (parameter != null)
+                        {
+                            CustomComboFunctions.OGCD.Toggle(Convert.ToUInt16(parameter));
+                        }
+
+                        break;
                     }
                 default:
                     ConfigWindow.IsOpen = !ConfigWindow.IsOpen;
