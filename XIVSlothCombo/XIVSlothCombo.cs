@@ -27,6 +27,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Game.Addon.Lifecycle;
 using ECommons.DalamudServices;
 using Dalamud.Game.Addon.Lifecycle.AddonArgTypes;
+using XIVSlothCombo.CustomComboNS.Functions;
 
 namespace XIVSlothCombo
 {

@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Statuses;
 using ECommons.DalamudServices;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.CustomComboNS;
 using XIVSlothCombo.CustomComboNS.Functions;
@@ -334,7 +335,9 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.AspectedHelios) && FindEffect(Buffs.AspectedHelios).RemainingTime > 2)
                         return Helios;
                 }
-
+                return actionID;
+            }
+        }
 
         internal class AST_ST_SimpleHeals : CustomCombo
         {
