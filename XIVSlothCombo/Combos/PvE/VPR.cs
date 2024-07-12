@@ -54,7 +54,8 @@ namespace XIVSlothCombo.Combos.PvE
             ThirdLegacy = 34642,
             FourthGeneration = 34630,
             FourthLegacy = 34643,
-            Ouroboros = 34631;
+            Ouroboros = 34631,
+            LastLash = 34635;
 
         public static class Buffs
         {
@@ -122,11 +123,12 @@ namespace XIVSlothCombo.Combos.PvE
                 bool DreadwinderReady = gauge.DreadCombo == DreadCombo.Dreadwinder;
                 bool HuntersCoilReady = gauge.DreadCombo == DreadCombo.HuntersCoil;
                 bool SwiftskinsCoilReady = gauge.DreadCombo == DreadCombo.SwiftskinsCoil;
+                float GCD = GetCooldown(DreadFangs).CooldownTotal;
 
                 if (actionID is SteelFangs)
                 {
                     // Opener for VPR
-                    if (VPROpener.DoFullOpener(ref actionID, true))
+                    if (VPROpener.DoFullOpener(ref actionID))
                         return actionID;
 
                     // Uncoiled combo
@@ -266,14 +268,14 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (lastComboMove is HindstingStrike or HindsbaneFang or FlankstingStrike or FlanksbaneFang)
                         {
-                            if (CanWeave(actionID) && LevelChecked(SerpentsTail) &&
-                                (WasLastAction(HindstingStrike) || WasLastAction(HindsbaneFang) ||
-                                WasLastAction(FlankstingStrike) || WasLastAction(FlanksbaneFang)))
+                            if (CanWeave(actionID) && LevelChecked(SerpentsTail) && HasCharges(DeathRattle) &&
+                                (WasLastWeaponskill(HindstingStrike) || WasLastWeaponskill(HindsbaneFang) ||
+                                WasLastWeaponskill(FlankstingStrike) || WasLastWeaponskill(FlanksbaneFang)))
                                 return OriginalHook(SerpentsTail);
 
                             //Reawakend Usage
                             if ((HasEffect(Buffs.ReadyToReawaken) || gauge.SerpentOffering >= 50) &&
-                                GetCooldownRemainingTime(SerpentsIre) >= 30 &&
+                                GetCooldownRemainingTime(SerpentsIre) > GCD * 15 &&
                                 HasEffect(Buffs.Swiftscaled) &&
                                 HasEffect(Buffs.HuntersInstinct) &&
                                 TargetHasEffect(Debuffs.NoxiousGnash) &&
@@ -315,13 +317,14 @@ namespace XIVSlothCombo.Combos.PvE
                 bool DreadwinderReady = gauge.DreadCombo == DreadCombo.Dreadwinder;
                 bool HuntersCoilReady = gauge.DreadCombo == DreadCombo.HuntersCoil;
                 bool SwiftskinsCoilReady = gauge.DreadCombo == DreadCombo.SwiftskinsCoil;
+                float GCD = GetCooldown(DreadFangs).CooldownTotal;
 
                 if (actionID is SteelFangs)
                 {
                     // Opener for VPR
                     if (IsEnabled(CustomComboPreset.VPR_ST_Opener))
                     {
-                        if (VPROpener.DoFullOpener(ref actionID, false))
+                        if (VPROpener.DoFullOpener(ref actionID))
                             return actionID;
                     }
 
@@ -519,15 +522,15 @@ namespace XIVSlothCombo.Combos.PvE
                         if (lastComboMove is HindstingStrike or HindsbaneFang or FlankstingStrike or FlanksbaneFang)
                         {
                             if (IsEnabled(CustomComboPreset.VPR_ST_SerpentsTail) &&
-                                CanWeave(actionID) && LevelChecked(SerpentsTail) &&
-                                (WasLastAction(HindstingStrike) || WasLastAction(HindsbaneFang) ||
-                                WasLastAction(FlankstingStrike) || WasLastAction(FlanksbaneFang)))
+                                CanWeave(actionID) && LevelChecked(SerpentsTail) && HasCharges(DeathRattle) &&
+                                (WasLastWeaponskill(HindstingStrike) || WasLastWeaponskill(HindsbaneFang) ||
+                                WasLastWeaponskill(FlankstingStrike) || WasLastWeaponskill(FlanksbaneFang)))
                                 return OriginalHook(SerpentsTail);
 
                             //Reawakend Usage
                             if (IsEnabled(CustomComboPreset.VPR_ST_Reawaken) &&
                                 (HasEffect(Buffs.ReadyToReawaken) || gauge.SerpentOffering >= 50) &&
-                                GetCooldownRemainingTime(SerpentsIre) >= 30 &&
+                                GetCooldownRemainingTime(SerpentsIre) > GCD * 15 &&
                                 HasEffect(Buffs.Swiftscaled) &&
                                 HasEffect(Buffs.HuntersInstinct) &&
                                 TargetHasEffect(Debuffs.NoxiousGnash) &&
@@ -539,7 +542,7 @@ namespace XIVSlothCombo.Combos.PvE
                             //Dreadwinder Usage
                             if (IsEnabled(CustomComboPreset.VPR_ST_CDs) &&
                                 IsEnabled(CustomComboPreset.VPR_ST_Dreadwinder) &&
-                                ((LevelChecked(Dreadwinder) && GetCooldownRemainingTime(Dreadwinder) <= GetCooldownRemainingTime(OriginalHook(DreadFangs)) + 0.25) || ActionReady(Dreadwinder)))
+                                LevelChecked(Dreadwinder) && ((GetCooldownRemainingTime(Dreadwinder) <= GetCooldownRemainingTime(OriginalHook(DreadFangs)) + 0.25) || ActionReady(Dreadwinder)))
                                 return Dreadwinder;
                         }
 
@@ -569,6 +572,7 @@ namespace XIVSlothCombo.Combos.PvE
                 bool PitOfDreadReady = gauge.DreadCombo == DreadCombo.PitOfDread;
                 bool SwiftskinsDenReady = gauge.DreadCombo == DreadCombo.SwiftskinsDen;
                 bool HuntersDenReady = gauge.DreadCombo == DreadCombo.HuntersDen;
+                float GCD = GetCooldown(DreadMaw).CooldownTotal;
 
                 if (actionID is SteelMaw)
                 {
@@ -678,13 +682,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (lastComboMove is BloodiedMaw or JaggedMaw)
                         {
-                            if (CanWeave(actionID) && LevelChecked(SerpentsTail) &&
-                                (WasLastAction(BloodiedMaw) || WasLastAction(JaggedMaw)))
+                            if (CanWeave(actionID) && LevelChecked(SerpentsTail) && HasCharges(LastLash) &&
+                                (WasLastWeaponskill(BloodiedMaw) || WasLastWeaponskill(JaggedMaw)))
                                 return OriginalHook(SerpentsTail);
 
                             //Reawakend Usage
                             if ((HasEffect(Buffs.ReadyToReawaken) || gauge.SerpentOffering >= 50) &&
-                                GetCooldownRemainingTime(SerpentsIre) >= 30 &&
+                                GetCooldownRemainingTime(SerpentsIre) > GCD * 10 &&
                                 HasEffect(Buffs.Swiftscaled) &&
                                 HasEffect(Buffs.HuntersInstinct) &&
                                 TargetHasEffect(Debuffs.NoxiousGnash) &&
@@ -721,6 +725,7 @@ namespace XIVSlothCombo.Combos.PvE
                 bool PitOfDreadReady = gauge.DreadCombo == DreadCombo.PitOfDread;
                 bool SwiftskinsDenReady = gauge.DreadCombo == DreadCombo.SwiftskinsDen;
                 bool HuntersDenReady = gauge.DreadCombo == DreadCombo.HuntersDen;
+                float GCD = GetCooldown(DreadMaw).CooldownTotal;
 
                 if (actionID is SteelMaw)
                 {
@@ -855,14 +860,14 @@ namespace XIVSlothCombo.Combos.PvE
                         if (lastComboMove is BloodiedMaw or JaggedMaw)
                         {
                             if (IsEnabled(CustomComboPreset.VPR_AoE_SerpentsTail) &&
-                                CanWeave(actionID) && LevelChecked(SerpentsTail) &&
-                                (WasLastAction(BloodiedMaw) || WasLastAction(JaggedMaw)))
+                                CanWeave(actionID) && LevelChecked(SerpentsTail) && HasCharges(LastLash) &&
+                                (WasLastWeaponskill(BloodiedMaw) || WasLastWeaponskill(JaggedMaw)))
                                 return OriginalHook(SerpentsTail);
 
                             //Reawakend Usage
                             if (IsEnabled(CustomComboPreset.VPR_AoE_Reawaken) &&
                                 (HasEffect(Buffs.ReadyToReawaken) || gauge.SerpentOffering >= 50) &&
-                                GetCooldownRemainingTime(SerpentsIre) >= 30 &&
+                                GetCooldownRemainingTime(SerpentsIre) > GCD * 10 &&
                                 HasEffect(Buffs.Swiftscaled) &&
                                 HasEffect(Buffs.HuntersInstinct) &&
                                 TargetHasEffect(Debuffs.NoxiousGnash) &&
