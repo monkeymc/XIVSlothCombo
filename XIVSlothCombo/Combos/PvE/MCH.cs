@@ -955,19 +955,6 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (OriginalHook(BarrelStabilizer) != BarrelStabilizer)
                     {
-                        if (HasEffect(Buffs.Wildfire))
-                        {
-                            if (GetBuffRemainingTime(Buffs.FullMetalMachinist) < GetBuffRemainingTime(Buffs.Wildfire))
-                            {
-                                return OriginalHook(BarrelStabilizer);
-                            }
-
-                            if (gauge.IsOverheated && GetBuffRemainingTime(Buffs.Wildfire) < 1.5)
-                            {
-                                return OriginalHook(BarrelStabilizer);
-                            }
-                        }
-
                         if (!gauge.IsOverheated && !HasEffect(Buffs.Wildfire) && GetCooldownRemainingTime(Wildfire) > 100)
                         {
                             return OriginalHook(BarrelStabilizer);
