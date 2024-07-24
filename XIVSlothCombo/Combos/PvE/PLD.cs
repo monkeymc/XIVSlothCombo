@@ -87,8 +87,8 @@ namespace XIVSlothCombo.Combos.PvE
                 //PLD_AoE_RequiescatWeave = new("PLD_AoE_RequiescatWeave"),
                 //PLD_ST_AtonementTiming = new("PLD_ST_EquilibriumTiming"),
                 //PLD_ST_DivineMightTiming = new("PLD_ST_DivineMightTiming"),
-                PLD_Intervene_MeleeOnly = new ("PLD_Intervene_MeleeOnly", 1),
-                PLD_ShieldLob_SubOption = new ("PLD_ShieldLob_SubOption", 1);
+                PLD_Intervene_MeleeOnly = new("PLD_Intervene_MeleeOnly", 1),
+                PLD_ShieldLob_SubOption = new("PLD_ShieldLob_SubOption", 1);
         }
 
         internal class PLD_ST_SimpleMode : CustomCombo
@@ -558,31 +558,26 @@ namespace XIVSlothCombo.Combos.PvE
                                 return OriginalHook(Requiescat);
                         }
 
-                    // Requiescat inside burst (checking for FoF buff causes a late weave and can misalign over long fights with some ping)
-                    if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_Requiescat) &&
-                        (WasLastAbility(FightOrFlight) || JustUsed(FightOrFlight,6f)) && ActionReady(Requiescat))
-                    {
-                        if ((Config.PLD_AoE_RequiescatWeave == 0 && CanWeave(actionID) ||
-                            (Config.PLD_AoE_RequiescatWeave == 1 && CanDelayedWeave(actionID, 2.0, 0.6))))
-                            return Requiescat;
-                    }
-
-                    // Actions under FoF burst
-                    if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_FoF) && HasEffect(Buffs.FightOrFlight))
-                    {
-                        if (CanWeave(actionID) && !WasLastAbility(FightOrFlight))
+                        // Burst Phase
+                        if (HasEffect(Buffs.FightOrFlight))
                         {
-                            if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_CircleOfScorn) &&
-                                ActionReady(CircleOfScorn))
-                                return CircleOfScorn;
+                            if (CanWeave(actionID))
+                            {
+                                // Melee oGCDs
+                                if (InMeleeRange())
+                                {
+                                    if (ActionReady(CircleOfScorn) && IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_CircleOfScorn))
+                                        return CircleOfScorn;
 
-                            if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_SpiritsWithin) &&
-                                ActionReady(OriginalHook(SpiritsWithin)))
-                                return OriginalHook(SpiritsWithin);
-                        }
-                        
-                        if (HasEffect(Buffs.Requiescat))
-                        {
+                                    if (ActionReady(SpiritsWithin) && IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_SpiritsWithin))
+                                        return OriginalHook(SpiritsWithin);
+                                }
+
+                                // Blade of Honor
+                                if (OriginalHook(Requiescat) == BladeOfHonor && IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_BladeOfHonor))
+                                    return OriginalHook(Requiescat);
+                            }
+
                             // Confiteor & Blades
                             if (HasEffect(Buffs.Requiescat) && GetResourceCost(Confiteor) <= LocalPlayer.CurrentMp &&
                                 ((HasEffect(Buffs.ConfiteorReady) && IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_Confiteor)) ||

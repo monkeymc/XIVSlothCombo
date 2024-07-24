@@ -1069,7 +1069,7 @@ namespace XIVSlothCombo.Combos.PvE
                 bool reassembledExcavator = (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) && Config.MCH_ST_Reassembled[3] && (HasEffect(Buffs.Reassembled) || !HasEffect(Buffs.Reassembled))) || (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) && !Config.MCH_ST_Reassembled[3] && !HasEffect(Buffs.Reassembled)) || (!HasEffect(Buffs.Reassembled) && GetRemainingCharges(Reassemble) <= Config.MCH_ST_ReassemblePool) || (!IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble));
 
                 // TOOLS!! Chainsaw Drill Air Anchor Excavator
-                if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) && !gauge.IsOverheated && !ActionWatching.WasLast2ActionsAbilities() &&
+                if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) && !gauge.IsOverheated && !ActionWatching.HasDoubleWeaved() &&
                     !HasEffect(Buffs.Reassembled) && ActionReady(Reassemble) && (CanWeave(actionID) || !InCombat()) &&
                     GetRemainingCharges(Reassemble) > Config.MCH_ST_ReassemblePool &&
                     ((Config.MCH_ST_Reassembled[0] && LevelChecked(AirAnchor) && ((GetCooldownRemainingTime(AirAnchor) <= GetCooldownRemainingTime(OriginalHook(SplitShot)) + 0.25) || ActionReady(AirAnchor)) && !battery) ||
@@ -1124,25 +1124,23 @@ namespace XIVSlothCombo.Combos.PvE
 
             private static bool UseQueen(MCHGauge gauge)
             {
-                if (IsEnabled(CustomComboPreset.MCH_Adv_TurretQueen) && Config.MCH_ST_TurretUsage == 1 &&
+                if (IsEnabled(CustomComboPreset.MCH_Adv_TurretQueen) && !ActionWatching.HasDoubleWeaved() &&
                     CanWeave(OriginalHook(SplitShot)) && !gauge.IsOverheated && !HasEffect(Buffs.Wildfire) &&
-                    LevelChecked(OriginalHook(RookAutoturret)) && !gauge.IsRobotActive && gauge.Battery >= 50)
+                    !WasLastWeaponskill(OriginalHook(Heatblast)) && LevelChecked(OriginalHook(RookAutoturret)) &&
+                    !gauge.IsRobotActive && gauge.Battery >= 50 &&
+                    ((LevelChecked(FullMetalField) && !WasLastWeaponskill(FullMetalField)) || !LevelChecked(FullMetalField)))
                 {
                     int queensUsed = ActionWatching.CombatActions.Count(x => x == OriginalHook(RookAutoturret));
 
-                    if (queensUsed < 2)
+                    if (queensUsed < 1)
                         return true;
 
-                    if (queensUsed >= 2 && queensUsed % 2 == 0 && gauge.Battery == 100)
+                    if (queensUsed >= 1 && queensUsed % 2 == 0 && gauge.Battery == 100)
                         return true;
 
-                    if (queensUsed >= 2 && queensUsed % 2 == 1 && gauge.Battery >= 80)
+                    if (queensUsed >= 1 && queensUsed % 2 == 1 && gauge.Battery >= 80)
                         return true;
                 }
-
-                if (IsEnabled(CustomComboPreset.MCH_Adv_TurretQueen) && Config.MCH_ST_TurretUsage == 0 &&
-                    CanWeave(OriginalHook(SplitShot)) && LevelChecked(OriginalHook(RookAutoturret)) && gauge.Battery >= 50)
-                    return true;
 
                 return false;
             }
