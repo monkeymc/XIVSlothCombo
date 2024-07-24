@@ -234,8 +234,8 @@ namespace XIVSlothCombo.Combos.PvE
                     //Card Draw
                     if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
                         ActionReady(OriginalHook(AstralDraw)) &&
-                        (Gauge.DrawnCards.All(x => x is CardType.NONE) || (DrawnCard == CardType.NONE && Config.AST_ST_DPS_OverwriteCards)) &&
-                        CanDelayedWeave(actionID))
+                        (Gauge.DrawnCards.All(x => x is CardType.NONE) || (DrawnCard == CardType.NONE && Config.AST_ST_DPS_OverwriteCards))) 
+                        // && CanDelayedWeave(actionID))
                         return OriginalHook(AstralDraw);
 
                     //Divination
@@ -243,9 +243,13 @@ namespace XIVSlothCombo.Combos.PvE
                         ActionReady(Divination) &&
                         !HasEffectAny(Buffs.Divination) && //Overwrite protection
                         GetTargetHPPercent() > Config.AST_DPS_DivinationOption &&
-                        CanDelayedWeave(actionID) &&
                         ActionWatching.NumberOfGcdsUsed >= 3)
-                        return Divination;
+                    {
+                        if (CanDelayedWeave(actionID))
+                        {
+                            return Divination;
+                        }
+                    }
 
                     if (IsEnabled(CustomComboPreset.AST_DPS_Oracle) &&
                         HasEffect(Buffs.Divining) &&
@@ -374,8 +378,9 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (IsEnabled(CustomComboPreset.AST_ST_SimpleHeals_EssentialDignity) &&
                         ActionReady(EssentialDignity) &&
-                        GetTargetHPPercent(healTarget) <= Config.AST_EssentialDignity &&
-                        CanSpellWeave(actionID))
+                        GetTargetHPPercent(healTarget) <= Config.AST_EssentialDignity 
+                        // && CanSpellWeave(actionID)
+                        )
                         return EssentialDignity;
 
                     if (IsEnabled(CustomComboPreset.AST_ST_SimpleHeals_Exaltation) &&
