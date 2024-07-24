@@ -3,9 +3,11 @@ using Dalamud.Game.ClientState.JobGauge.Types;
 using Dalamud.Game.ClientState.Statuses;
 using ECommons.DalamudServices;
 using System;
+using System.Diagnostics;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
+using XIVSlothCombo.Extensions;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -938,25 +940,33 @@ namespace XIVSlothCombo.Combos.PvE
                         return Variant.VariantRampart;
                     }
 
-                    if (ActionReady(RadiantFinale) && (ActionReady(BattleVoice) || HasEffect(Buffs.BattleVoice)))
+                    if (ActionReady(BattleVoice) && (ActionReady(RadiantFinale) || !RadiantFinale.LevelChecked()))
                     {
-                        if (IsOffCooldown(WanderersMinuet) && InCombat())
+                        if (ActionReady(WanderersMinuet) && InCombat())
                         {
                             return WanderersMinuet;
                         }
+                    }
 
+                    if (ActionReady(BattleVoice) && (ActionReady(RadiantFinale) || !RadiantFinale.LevelChecked()))
+                    {
+
+                        if (TargetHasEffect(Debuffs.VenomousBite) || TargetHasEffect(Debuffs.CausticBite))
+                        {
+
+                            return BattleVoice;
+                        }
+                    }
+
+                    if (ActionReady(RadiantFinale) && HasEffect(Buffs.BattleVoice))
+                    {
                         if (Array.Find(gauge.Coda, SongIsNotNone) > 0)
                         {
                             return RadiantFinale;
                         }
                     }
 
-                    if (ActionReady(BattleVoice) && (HasEffect(Buffs.RadiantFinale) || WasLastAction(RadiantFinale)))
-                    {
-                        return BattleVoice;
-                    }
-
-                    if (HasEffect(Buffs.BattleVoice) && HasEffect(Buffs.RagingStrikes))
+                    if (HasEffectAny(Buffs.BattleVoice) && HasEffect(Buffs.RagingStrikes))
                     {
                         if (HasEffect(Buffs.RadiantEncoreReady))
                         {
@@ -1041,7 +1051,10 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (CanWeave(actionID, 0.5))
                     {
-                        if (ActionReady(RagingStrikes) && (HasEffect(Buffs.BattleVoice) || WasLastAction(BattleVoice)))
+                        if (ActionReady(RagingStrikes) && 
+                            (HasEffectAny(RadiantFinale.LevelChecked() ? Buffs.RadiantFinale : Buffs.BattleVoice) 
+                            || WasLastAction(RadiantFinale.LevelChecked() ? RadiantFinale : BattleVoice))
+                            )
                         {
                             return RagingStrikes;
                         }
@@ -1064,7 +1077,7 @@ namespace XIVSlothCombo.Combos.PvE
                             }
                         }
 
-                        if (ActionReady(Barrage) && !HasEffect(Buffs.HawksEye) && HasEffect(Buffs.BattleVoice))
+                        if (ActionReady(Barrage) && !HasEffect(Buffs.HawksEye) && HasEffect(Buffs.RagingStrikes))
                         {
                             return Barrage;
                         }
@@ -1076,7 +1089,7 @@ namespace XIVSlothCombo.Combos.PvE
                                 return Sidewinder;
                             }
 
-                            if (HasEffect(Buffs.BattleVoice))
+                            if (HasEffect(Buffs.RagingStrikes))
                             {
                                 return Sidewinder;
                             }
@@ -1094,7 +1107,7 @@ namespace XIVSlothCombo.Combos.PvE
                                 return OriginalHook(Bloodletter);
                             }
 
-                            if ((HasEffect(Buffs.BattleVoice) || gauge.Song == Song.MAGE) && HasCharges(Bloodletter))
+                            if ((HasEffect(Buffs.RagingStrikes) || gauge.Song == Song.MAGE) && HasCharges(Bloodletter))
                             {
                                 return OriginalHook(Bloodletter);
                             }
@@ -1105,6 +1118,14 @@ namespace XIVSlothCombo.Combos.PvE
                         {
                             if (PlayerHealthPercentageHp() <= PluginConfiguration.GetCustomIntValue(Config.BRD_STSecondWindThreshold) && ActionReady(All.SecondWind))
                                 return All.SecondWind;
+                        }
+
+                        if (ActionReady(3561))
+                        {
+                            if (HasCleansableDebuff(LocalPlayer))
+                            {
+                                return 3561;
+                            }
                         }
                     }
 
@@ -1219,17 +1240,17 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (LevelChecked(ApexArrow))
                         {
-                            if (HasEffect(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 5 && gauge.SoulVoice >= 80)
+                            if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 5 && gauge.SoulVoice >= 80)
                             {
                                 return ApexArrow;
                             }
 
-                            if (HasEffect(Buffs.BattleVoice) && HasEffect(Buffs.RagingStrikes) && gauge.SoulVoice >= 100)
+                            if (HasEffect(Buffs.RagingStrikes) && gauge.SoulVoice >= 100)
                             {
                                 return ApexArrow;
                             }
 
-                            if (GetCooldownRemainingTime(BattleVoice) > 40 && gauge.SoulVoice >= 80)
+                            if (!HasEffect(Buffs.RagingStrikes) && GetCooldownRemainingTime(RagingStrikes) > 40 && gauge.SoulVoice >= 80)
                             {
                                 return ApexArrow;
                             }
