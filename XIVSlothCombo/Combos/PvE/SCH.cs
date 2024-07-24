@@ -293,6 +293,12 @@ namespace XIVSlothCombo.Combos.PvE
                         if (IsEnabled(CustomComboPreset.SCH_DeploymentTactics_Recitation) && ActionReady(Recitation))
                             return Recitation;
 
+                        if (ActionReady(FeyIllumination) && !(Gauge.SeraphTimer > 0))
+                            return FeyIllumination;
+
+                        if (ActionReady(25867))
+                            return 25867;
+
                         return OriginalHook(Adloquium);
                     }
                 }
@@ -486,6 +492,10 @@ namespace XIVSlothCombo.Combos.PvE
             {
                 if (actionID is Succor)
                 {
+                    // FeyBlessing
+                    if (ActionReady(FeyBlessing) && !(Gauge.SeraphTimer > 0))
+                        return OriginalHook(FeyBlessing);
+
                     // Aetherflow
                     if (IsEnabled(CustomComboPreset.SCH_AoE_Heal_Aetherflow) &&
                         ActionReady(Aetherflow) && !Gauge.HasAetherflow() &&
