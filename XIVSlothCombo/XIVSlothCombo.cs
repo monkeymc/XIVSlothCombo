@@ -307,7 +307,7 @@ namespace XIVSlothCombo
 
                 case "toggle": // toggle a feature
                     {
-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+                        if (true)
                         {
                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
