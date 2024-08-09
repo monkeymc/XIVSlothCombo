@@ -1,17 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using XIVSlothCombo.Combos;
+using ECommons.Automation;
+using XIVSlothCombo.Data;
+using XIVSlothCombo.Window.Functions;
+using static XIVSlothCombo.Data.ActionWatching;
 
 namespace XIVSlothCombo.CustomComboNS.Functions
 {
     internal abstract partial class CustomComboFunctions
     {
         public static List<uint> OGCD = [];
+        internal static Chat Chat = new Chat();
 
         internal uint Invoke(uint actionID)
         {
-            if (OGCD.Count > 0 && (CanWeave(actionID, 0.5) || !HasTarget()))
+            if (OGCD.Count > 0 && (CanWeave(actionID) || !HasTarget()))
             {
                 if (!HasCharges(OGCD.First()) || JustUsed(OGCD.First()))
                 {
@@ -20,15 +23,27 @@ namespace XIVSlothCombo.CustomComboNS.Functions
 
                 try
                 {
-                    return OGCD.First();
-                } 
-                catch 
+                    if (CanWeave(actionID))
+                    {
+                        Auto(OGCD.First());
+                    }
+                    else
+                    {
+                        return OGCD.First();
+                    }
+                }
+                catch
                 {
                     return actionID;
                 }
             }
 
             return actionID;
+        }
+
+        internal void Auto(uint actionID)
+        {
+            Chat.ExecuteCommand($"/ac \"{ActionWatching.GetActionName(actionID)}\"");
         }
     }
 }
