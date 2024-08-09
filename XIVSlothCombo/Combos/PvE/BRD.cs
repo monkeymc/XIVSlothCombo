@@ -9,6 +9,8 @@ using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
 using static FFXIVClientStructs.FFXIV.Client.UI.AddonJobHudBRD0;
 using XIVSlothCombo.Extensions;
+using FFXIVClientStructs.FFXIV.Client.UI;
+using XIVSlothCombo.Data;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -508,8 +510,7 @@ namespace XIVSlothCombo.Combos.PvE
                             else return Sidewinder;
                         }
 
-
-                        if (LevelChecked(Bloodletter) && ((!openerFinished && IsOnCooldown(RagingStrikes)) || openerFinished))
+                        if (LevelChecked(Bloodletter))
                         {
                             uint rainOfDeathCharges = GetRemainingCharges(RainOfDeath);
 
@@ -1054,7 +1055,7 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
-                if (actionID is HeavyShot or BurstShot)
+                if (actionID is HeavyShot)
                 {
                     BRDGauge gauge = GetJobGauge<BRDGauge>();
                     bool canWeave = CanWeave(actionID);
@@ -1108,7 +1109,6 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (TargetHasEffect(Debuffs.VenomousBite) || TargetHasEffect(Debuffs.CausticBite))
                         {
-
                             return BattleVoice;
                         }
                     }
@@ -1121,12 +1121,13 @@ namespace XIVSlothCombo.Combos.PvE
                         }
                     }
 
-                    if (HasEffectAny(Buffs.BattleVoice) && HasEffect(Buffs.RagingStrikes))
+                    if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 10 && HasEffect(Buffs.RagingStrikes))
                     {
                         if (HasEffect(Buffs.RadiantEncoreReady))
                         {
                             return RadiantEncore;
                         }
+
                         if (HasEffect(Buffs.ResonantArrowReady))
                         {
                             return ResonantArrow;
@@ -1135,20 +1136,24 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (IsEnabled(CustomComboPreset.BRD_Simple_Song) && InCombat())
                     {
-                        bool enabled = CanWeave(actionID, 0.5) || !HasTarget();
+                        bool enabled = CanWeave(actionID);
                         int songTimerInSeconds = gauge.SongTimer / 1000;
 
                         // Limit optimisation to when you are high enough level to benefit from it.
                         if (LevelChecked(WanderersMinuet))
                         {
-                            // 43s of Wanderer's Minute, ~36s of Mage's Ballad, and ~43s of Army's Paeon    
                             bool minuetReady = IsOffCooldown(WanderersMinuet);
                             bool balladReady = IsOffCooldown(MagesBallad);
                             bool paeonReady = IsOffCooldown(ArmysPaeon);
                             bool empyrealReady = LevelChecked(EmpyrealArrow) && IsOffCooldown(EmpyrealArrow);
+                            // 6.0 43s of Wanderer's Minute, ~36s of Mage's Ballad, and ~43s of Army's Paeon    
+                            // 7.0 43s of Wanderer's Minute, ~43s of Mage's Ballad, and ~34s of Army's Paeon    
+                            var WandererExpire = 45 - 43;
+                            var MageExpire = 45 - 43;
+                            var ArmyExpire = 45 - 34;
 
-                            if (empyrealReady && !openerFinished && JustUsed(WanderersMinuet))
-                                return EmpyrealArrow;
+                            /*if (empyrealReady && !openerFinished && JustUsed(WanderersMinuet))
+                                return EmpyrealArrow;*/
 
                             if (enabled)
                             {
@@ -1156,31 +1161,47 @@ namespace XIVSlothCombo.Combos.PvE
                                 {
                                     // Logic to determine first song
                                     if (minuetReady && !(JustUsed(MagesBallad) || JustUsed(ArmysPaeon)))
-                                        return WanderersMinuet;
+                                    {
+                                        Auto(WanderersMinuet);
+                                    }
+
                                     if (balladReady && !(JustUsed(WanderersMinuet) || JustUsed(ArmysPaeon)))
-                                        return MagesBallad;
+                                    {
+                                        Auto(MagesBallad);
+                                    }
+
                                     if (paeonReady && !(JustUsed(MagesBallad) || JustUsed(WanderersMinuet)))
-                                        return ArmysPaeon;
+                                    {
+                                        Auto(ArmysPaeon);
+                                    }
                                 }
 
                                 if (songWanderer)
                                 {
-                                    if (songTimerInSeconds < 3 && gauge.Repertoire > 0) // Spend any repertoire before switching to next song
-                                        return OriginalHook(WanderersMinuet);
-                                    if (songTimerInSeconds < 3 && balladReady)          // Move to Mage's Ballad if < 3 seconds left on song
-                                        return MagesBallad;
+                                    if (songTimerInSeconds <= WandererExpire && gauge.Repertoire > 0) // Spend any repertoire before switching to next song
+                                    {
+                                        Auto(WanderersMinuet);
+                                    }
+
+                                    if (songTimerInSeconds <= WandererExpire && balladReady)          // Move to Mage's Ballad if < 3 seconds left on song
+                                    {
+                                        Auto(MagesBallad);
+                                    }
                                 }
 
                                 if (songMage)
                                 {
 
                                     // Move to Army's Paeon if < 12 seconds left on song
-                                    if (songTimerInSeconds < 12 && paeonReady)
+                                    if (songTimerInSeconds <= MageExpire && paeonReady)
                                     {
                                         // Special case for Empyreal Arrow: it must be cast before you change to it to avoid drift!
                                         if (empyrealReady)
-                                            return EmpyrealArrow;
-                                        return ArmysPaeon;
+                                        {
+                                            Auto(EmpyrealArrow);
+                                        }
+                                        
+                                        Auto(ArmysPaeon);
                                     }
                                 }
                             }
@@ -1188,8 +1209,10 @@ namespace XIVSlothCombo.Combos.PvE
                             if (songArmy && enabled)
                             {
                                 // Move to Wanderer's Minuet if < 3 seconds left on song or WM off CD and have 4 repertoires of AP
-                                if (songTimerInSeconds < 3 || (minuetReady && gauge.Repertoire == 4))
-                                    return WanderersMinuet;
+                                if (songTimerInSeconds <= ArmyExpire || (minuetReady && gauge.Repertoire == 4))
+                                {
+                                    Auto(WanderersMinuet);
+                                }
                             }
                         }
                         else if (songTimerInSeconds < 3 && enabled)
@@ -1198,102 +1221,94 @@ namespace XIVSlothCombo.Combos.PvE
                             bool paeonReady = LevelChecked(ArmysPaeon) && IsOffCooldown(ArmysPaeon);
 
                             if (balladReady)
-                                return MagesBallad;
+                            {
+                                Auto(MagesBallad);
+                            }
+
                             if (paeonReady)
-                                return ArmysPaeon;
+                            {
+                                Auto(ArmysPaeon);
+                            }
                         }
                     }
 
-                    if (CanWeave(actionID, 0.5))
+                    if (CanWeave(actionID))
                     {
-                        if (ActionReady(RagingStrikes) && 
-                            (HasEffectAny(RadiantFinale.LevelChecked() ? Buffs.RadiantFinale : Buffs.BattleVoice) 
+                        if (ActionReady(RagingStrikes) &&
+                            (HasEffectAny(RadiantFinale.LevelChecked() ? Buffs.RadiantFinale : Buffs.BattleVoice)
                             || WasLastAction(RadiantFinale.LevelChecked() ? RadiantFinale : BattleVoice))
                             )
                         {
-                            return RagingStrikes;
+                            Auto(RagingStrikes);
                         }
 
-                        if (ActionReady(EmpyrealArrow))
+                        if (ActionReady(Barrage) && !HasEffect(Buffs.HawksEye) && HasEffect(Buffs.RagingStrikes))
                         {
-                            return EmpyrealArrow;
+                            Auto(Barrage);
+                        }
+
+                        if (ActionReady(Sidewinder))
+                        {
+                            if (GetCooldownRemainingTime(BattleVoice) > 50 && (!RagingStrikes.LevelChecked() || IsOnCooldown(RagingStrikes)))
+                            {
+                                Auto(Sidewinder);
+                            }
+
+                            if (HasEffect(Buffs.RagingStrikes))
+                            {
+                                Auto(Sidewinder);
+                            }
                         }
 
                         if (gauge.Song == Song.WANDERER && gauge.Repertoire > 0)
                         {
                             if (gauge.Repertoire == 3)
                             {
-                                return OriginalHook(PitchPerfect);
+                                Auto(PitchPerfect);
                             }
 
-                            if (GetBuffRemainingTime(Buffs.RagingStrikes) < 3)
+                            if (HasEffect(Buffs.RagingStrikes) && GetBuffRemainingTime(Buffs.RagingStrikes) < 3)
                             {
-                                return OriginalHook(PitchPerfect);
+                                Auto(PitchPerfect);
                             }
                         }
 
-                        if (ActionReady(Barrage) && !HasEffect(Buffs.HawksEye) && HasEffect(Buffs.RagingStrikes))
+                        if (ActionReady(EmpyrealArrow))
                         {
-                            return Barrage;
-                        }
-
-                        if (ActionReady(Sidewinder))
-                        {
-                            if (GetCooldownRemainingTime(BattleVoice) > 50)
-                            {
-                                return Sidewinder;
-                            }
-
-                            if (HasEffect(Buffs.RagingStrikes))
-                            {
-                                return Sidewinder;
-                            }
+                            Auto(EmpyrealArrow);
                         }
 
                         if (ActionReady(Bloodletter))
                         {
-                            if (GetMaxCharges(Bloodletter) > 1 && HasCharges(Bloodletter) && GetCooldownChargeRemainingTime(Bloodletter) < 3)
+                            if (IsOffCooldown(Bloodletter))
                             {
-                                return OriginalHook(Bloodletter);
+                                Auto(Bloodletter);
                             }
 
-                            if (GetMaxCharges(Bloodletter) == 1)
+                            if (GetMaxCharges(Bloodletter) > 1 
+                                && GetMaxCharges(Bloodletter) - 1 == GetRemainingCharges(Bloodletter) 
+                                && GetCooldownChargeRemainingTime(Bloodletter) < 3)
                             {
-                                return OriginalHook(Bloodletter);
+                                Auto(Bloodletter);
                             }
 
                             if ((HasEffect(Buffs.RagingStrikes) || gauge.Song == Song.MAGE) && HasCharges(Bloodletter))
                             {
-                                return OriginalHook(Bloodletter);
+                                Auto(Bloodletter);
                             }
                         }
 
-                        // healing - please move if not appropriate priority
-                        if (IsEnabled(CustomComboPreset.BRD_ST_SecondWind))
+                        if (PlayerHealthPercentageHp() < 50 && ActionReady(All.SecondWind))
                         {
-                            if (PlayerHealthPercentageHp() <= PluginConfiguration.GetCustomIntValue(Config.BRD_STSecondWindThreshold) && ActionReady(All.SecondWind))
-                                return All.SecondWind;
+                            Auto(All.SecondWind);
                         }
 
                         if (ActionReady(3561))
                         {
                             if (HasCleansableDebuff(LocalPlayer))
                             {
-                                return 3561;
+                                Auto(3561);
                             }
-                        }
-                    }
-
-                    if (InCombat())
-                    {
-                        if (ActionReady(Bloodletter) && IsOffCooldown(Bloodletter))
-                        {
-                            return OriginalHook(Bloodletter);
-                        }
-
-                        if (ActionReady(EmpyrealArrow))
-                        {
-                            return EmpyrealArrow;
                         }
                     }
 
@@ -1363,7 +1378,6 @@ namespace XIVSlothCombo.Combos.PvE
                             }
                         }
                     }
-
                     else
                     {
                         if (useIronJaws)
@@ -1395,7 +1409,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                         if (LevelChecked(ApexArrow))
                         {
-                            if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 5 && gauge.SoulVoice >= 80)
+                            if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 10 && gauge.SoulVoice >= 80)
                             {
                                 return ApexArrow;
                             }
