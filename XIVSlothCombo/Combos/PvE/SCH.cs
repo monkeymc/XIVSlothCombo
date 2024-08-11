@@ -365,14 +365,18 @@ namespace XIVSlothCombo.Combos.PvE
                     if (IsEnabled(CustomComboPreset.SCH_DPS_Aetherflow) &&
                         ActionReady(Aetherflow) && !Gauge.HasAetherflow() &&
                         InCombat() && CanSpellWeave(actionID))
-                        return Aetherflow;
+                    {
+                        Auto(Aetherflow);
+                    }
 
                     // Lucid Dreaming
                     if (IsEnabled(CustomComboPreset.SCH_DPS_Lucid) &&
                         ActionReady(All.LucidDreaming) &&
                         LocalPlayer.CurrentMp <= Config.SCH_ST_DPS_LucidOption &&
                         CanSpellWeave(actionID))
-                        return All.LucidDreaming;
+                    {
+                        Auto(All.LucidDreaming);
+                    }
 
                     //Target based options
                     if (HasBattleTarget())
@@ -386,7 +390,9 @@ namespace XIVSlothCombo.Combos.PvE
                                 GetCooldownRemainingTime(Aetherflow) <= edTime &&
                                 (!IsEnabled(CustomComboPreset.SCH_DPS_EnergyDrain_BurstSaver) || (LevelChecked(ChainStratagem) && GetCooldownRemainingTime(ChainStratagem) > 10) || (!ChainStratagem.LevelChecked())) &&
                                 CanSpellWeave(actionID))
-                                return EnergyDrain;
+                            {
+                                Auto(EnergyDrain);
+                            }
                         }
 
                         // Chain Stratagem
@@ -398,13 +404,17 @@ namespace XIVSlothCombo.Combos.PvE
                                 GetTargetHPPercent() > Config.SCH_ST_DPS_ChainStratagemOption &&
                                 InCombat() &&
                                 CanSpellWeave(actionID))
-                                return ChainStratagem;
+                            {
+                                Auto(ChainStratagem);
+                            }
 
                             if (LevelChecked(BanefulImpaction) &&
                                 HasEffect(Buffs.ImpactImminent) &&
                                 InCombat() &&
                                 CanSpellWeave(actionID))
-                                return BanefulImpaction; 
+                            {
+                                Auto(BanefulImpaction);
+                            }
                             // Don't use OriginalHook(ChainStratagem), because player can disable ingame action replacement
                         }
                         

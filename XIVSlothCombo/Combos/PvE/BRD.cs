@@ -11,6 +11,7 @@ using static FFXIVClientStructs.FFXIV.Client.UI.AddonJobHudBRD0;
 using XIVSlothCombo.Extensions;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using XIVSlothCombo.Data;
+using ImGuiNET;
 
 namespace XIVSlothCombo.Combos.PvE
 {
@@ -1096,9 +1097,9 @@ namespace XIVSlothCombo.Combos.PvE
                         return Variant.VariantRampart;
                     }
 
-                    if (ActionReady(BattleVoice) && (ActionReady(RadiantFinale) || !RadiantFinale.LevelChecked()))
+                    if (ActionReady(WanderersMinuet) && ActionReady(BattleVoice) && (ActionReady(RadiantFinale) || !RadiantFinale.LevelChecked()))
                     {
-                        if (ActionReady(WanderersMinuet) && InCombat())
+                        if (WasLastWeaponskill(OriginalHook(Stormbite)) || InCombat())
                         {
                             return WanderersMinuet;
                         }
@@ -1106,8 +1107,12 @@ namespace XIVSlothCombo.Combos.PvE
 
                     if (ActionReady(BattleVoice) && (ActionReady(RadiantFinale) || !RadiantFinale.LevelChecked()))
                     {
+                        if (TargetHasEffect(Debuffs.CausticBite) || TargetHasEffect(Debuffs.VenomousBite))
+                        {
+                            return BattleVoice;
+                        }
 
-                        if (TargetHasEffect(Debuffs.VenomousBite) || TargetHasEffect(Debuffs.CausticBite))
+                        if (WasLastWeaponskill(OriginalHook(CausticBite)))
                         {
                             return BattleVoice;
                         }
@@ -1118,19 +1123,6 @@ namespace XIVSlothCombo.Combos.PvE
                         if (Array.Find(gauge.Coda, SongIsNotNone) > 0)
                         {
                             return RadiantFinale;
-                        }
-                    }
-
-                    if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 10 && HasEffect(Buffs.RagingStrikes))
-                    {
-                        if (HasEffect(Buffs.RadiantEncoreReady))
-                        {
-                            return RadiantEncore;
-                        }
-
-                        if (HasEffect(Buffs.ResonantArrowReady))
-                        {
-                            return ResonantArrow;
                         }
                     }
 
@@ -1232,7 +1224,7 @@ namespace XIVSlothCombo.Combos.PvE
                         }
                     }
 
-                    if (CanWeave(actionID))
+                    if (CanWeave(actionID) && InCombat())
                     {
                         if (ActionReady(RagingStrikes) &&
                             (HasEffectAny(RadiantFinale.LevelChecked() ? Buffs.RadiantFinale : Buffs.BattleVoice)
@@ -1245,6 +1237,21 @@ namespace XIVSlothCombo.Combos.PvE
                         if (ActionReady(Barrage) && !HasEffect(Buffs.HawksEye) && HasEffect(Buffs.RagingStrikes))
                         {
                             Auto(Barrage);
+                        }
+
+                        if (ActionReady(EmpyrealArrow))
+                        {
+                            if (gauge.Song == Song.WANDERER)
+                            {
+                                if (gauge.SongTimer < 40_000 || JustUsed(RagingStrikes))
+                                {
+                                    Auto(EmpyrealArrow);
+                                }
+                            }
+                            else
+                            {
+                                Auto(EmpyrealArrow);
+                            }
                         }
 
                         if (ActionReady(Sidewinder))
@@ -1271,11 +1278,6 @@ namespace XIVSlothCombo.Combos.PvE
                             {
                                 Auto(PitchPerfect);
                             }
-                        }
-
-                        if (ActionReady(EmpyrealArrow))
-                        {
-                            Auto(EmpyrealArrow);
                         }
 
                         if (ActionReady(Bloodletter))
@@ -1309,6 +1311,19 @@ namespace XIVSlothCombo.Combos.PvE
                             {
                                 Auto(3561);
                             }
+                        }
+                    }
+
+                    if (HasEffectAny(Buffs.BattleVoice) && GetBuffRemainingTime(Buffs.BattleVoice) < 10 && HasEffect(Buffs.RagingStrikes))
+                    {
+                        if (HasEffect(Buffs.RadiantEncoreReady))
+                        {
+                            return RadiantEncore;
+                        }
+
+                        if (HasEffect(Buffs.ResonantArrowReady))
+                        {
+                            return ResonantArrow;
                         }
                     }
 
