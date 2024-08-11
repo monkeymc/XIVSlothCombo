@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Components;
 using Dalamud.Utility;
+using ECommons.ChatMethods;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using ImGuiNET;
@@ -27,6 +28,12 @@ namespace XIVSlothCombo.Window.Functions
             var blueAttr = preset.GetAttribute<BlueInactiveAttribute>();
 
             ImGui.Spacing();
+
+            if (ImGui.Button($"{preset}"))
+            {
+                ImGui.SetClipboardText($"/scombo toggle {preset}");
+                ChatPrinter.Green($"{preset} Copied");
+            }
 
             if (ImGui.Checkbox($"{info.FancyName}###{info.FancyName}{i}", ref enabled))
             {
