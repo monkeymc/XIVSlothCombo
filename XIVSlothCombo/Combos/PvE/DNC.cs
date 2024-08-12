@@ -453,7 +453,7 @@ namespace XIVSlothCombo.Combos.PvE
                             // Burst FD1
                             if (HasEffect(Buffs.Devilment) && gauge.Feathers > 0)
                             {
-                                return FanDance1;
+                                return FanDance3;
                             }
 
                             // FD1 Pooling
