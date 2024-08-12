@@ -399,7 +399,7 @@ namespace XIVSlothCombo.Combos.PvE
                     }
 
                     // ST Feathers & Fans
-                    if (IsEnabled(CustomComboPreset.DNC_ST_Adv_Feathers) && LevelChecked(FanDance1))
+                    if (LevelChecked(FanDance1))
                     {
                         // FD1 HP% Dump
                         if (GetTargetHPPercent() <= targetHpThresholdFeather && gauge.Feathers > 0)
