@@ -383,7 +383,7 @@ namespace XIVSlothCombo.Combos.PvE
                         // Burst FD3
                         if (HasEffect(Buffs.Devilment))
                         {
-                            return FanDance1;
+                            return FanDance3;
                         }
 
                         // FD3 Pooling
