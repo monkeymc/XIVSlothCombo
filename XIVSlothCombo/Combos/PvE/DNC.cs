@@ -2,6 +2,7 @@
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
+using XIVSlothCombo.Extensions;
 using XIVSlothCombo.Services;
 
 namespace XIVSlothCombo.Combos.PvE
@@ -376,36 +377,64 @@ namespace XIVSlothCombo.Combos.PvE
 
                 if (CanWeave(actionID) && !WasLastWeaponskill(TechnicalFinish4))
                 {
+                    // FD3
                     if (HasEffect(Buffs.ThreeFoldFanDance))
-                        return FanDance3;
+                    {
+                        // Burst FD3
+                        if (HasEffect(Buffs.Devilment))
+                        {
+                            return FanDance1;
+                        }
+
+                        // FD3 Pooling
+                        if (GetCooldownRemainingTime(Devilment) > 20)
+                        {
+                            return FanDance3;
+                        }
+                    }
 
                     if (HasEffect(Buffs.FourFoldFanDance))
+                    {
                         return FanDance4;
+                    }
 
                     // ST Feathers & Fans
-                    if (IsEnabled(CustomComboPreset.DNC_ST_Simple_Feathers) &&
-                        LevelChecked(FanDance1))
+                    if (IsEnabled(CustomComboPreset.DNC_ST_Adv_Feathers) && LevelChecked(FanDance1))
                     {
                         // FD1 HP% Dump
                         if (GetTargetHPPercent() <= targetHpThresholdFeather && gauge.Feathers > 0)
-                            return FanDance1;
-
-                        if (LevelChecked(TechnicalStep))
                         {
-                            // Burst FD1
-                            if (HasEffect(Buffs.TechnicalFinish) && gauge.Feathers > 0)
-                                return FanDance1;
-
-                            // FD1 Pooling
-                            if (gauge.Feathers > 3 &&
-                                (GetCooldownRemainingTime(TechnicalStep) > 2.5f ||
-                                 IsOffCooldown(TechnicalStep)))
-                                return FanDance1;
+                            return FanDance1;
                         }
 
-                        // FD1 Non-pooling & under burst level
-                        if (!LevelChecked(TechnicalStep) && gauge.Feathers > 0)
+                        if (gauge.Feathers > 0 && Devilment.LevelChecked())
+                        {
+                            // Burst FD1
+                            if (HasEffect(Buffs.Devilment))
+                            {
+                                return FanDance1;
+                            }
+
+                            // FD1 Pooling
+                            if (GetCooldownRemainingTime(Devilment) < 20)
+                            {
+                                if (gauge.Feathers > 3 && HasEffect(Buffs.ThreeFoldFanDance))
+                                {
+                                    return FanDance1;
+                                }
+                            }
+                            else
+                            {
+                                if (gauge.Feathers > 3)
+                                {
+                                    return FanDance1;
+                                }
+                            }
+                        }
+                        else
+                        {
                             return FanDance1;
+                        }
                     }
 
                     // ST Panic Heals
