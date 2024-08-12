@@ -457,7 +457,9 @@ namespace XIVSlothCombo.Combos.PvE
                             }
 
                             // FD1 Pooling
-                            if (GetCooldownRemainingTime(Devilment) > 10 && gauge.Feathers > 3 && HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow))
+                            if (GetCooldownRemainingTime(Devilment) > 10 
+                                && gauge.Feathers > 3 
+                                && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow)))
                             {
                                 return FanDance1;
                             }
