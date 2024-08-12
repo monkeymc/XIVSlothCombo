@@ -387,7 +387,7 @@ namespace XIVSlothCombo.Combos.PvE
                         }
 
                         // FD3 Pooling
-                        if (GetCooldownRemainingTime(Devilment) > 20)
+                        if (GetCooldownRemainingTime(Devilment) > 15)
                         {
                             return FanDance3;
                         }
@@ -407,33 +407,26 @@ namespace XIVSlothCombo.Combos.PvE
                             return FanDance1;
                         }
 
-                        if (gauge.Feathers > 0 && Devilment.LevelChecked())
+                        if (Devilment.LevelChecked())
                         {
                             // Burst FD1
-                            if (HasEffect(Buffs.Devilment))
+                            if (HasEffect(Buffs.Devilment) && gauge.Feathers > 0)
                             {
                                 return FanDance1;
                             }
 
                             // FD1 Pooling
-                            if (GetCooldownRemainingTime(Devilment) < 20)
+                            if (GetCooldownRemainingTime(Devilment) > 10 && gauge.Feathers > 3 && HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow))
                             {
-                                if (gauge.Feathers > 3 && HasEffect(Buffs.ThreeFoldFanDance))
-                                {
-                                    return FanDance1;
-                                }
-                            }
-                            else
-                            {
-                                if (gauge.Feathers > 3)
-                                {
-                                    return FanDance1;
-                                }
+                                return FanDance1;
                             }
                         }
                         else
                         {
-                            return FanDance1;
+                            if (gauge.Feathers > 0)
+                            {
+                                return FanDance1;
+                            }
                         }
                     }
 
