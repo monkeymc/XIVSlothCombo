@@ -441,6 +441,43 @@ namespace XIVSlothCombo.Combos.PvE
                 }
                 #endregion
 
+                #region BURST
+                if (HasEffect(Buffs.Devilment))
+                {
+                    if (gauge.Esprit >= 85)
+                        return SaberDance;
+
+                    if (HasEffect(Buffs.LastDanceReady))
+                        return LastDance;
+
+                    if (HasEffect(Buffs.FlourishingFinish))
+                    {
+                        if (gauge.Esprit >= 50)
+                            return SaberDance;
+
+                        return Tillana;
+                    }
+
+                    if (HasEffect(Buffs.DanceOfTheDawnReady))
+                        return OriginalHook(DanceOfTheDawn);
+
+                    if (HasEffect(Buffs.FinishingMoveReady))
+                        return OriginalHook(FinishingMove);
+
+                    if (gauge.Esprit >= 50)
+                        return SaberDance;
+
+                    if (HasEffect(Buffs.FlourishingStarfall))
+                        return StarfallDance;
+
+                    if (flow)
+                        return Fountainfall;
+
+                    if (symmetry)
+                        return ReverseCascade;
+                }
+                #endregion
+
                 #region GCD
                 // ST Technical Step
                 if (needToTech)
@@ -492,7 +529,12 @@ namespace XIVSlothCombo.Combos.PvE
                 // ST Tillana
                 if (HasEffect(Buffs.FlourishingFinish) &&
                     IsEnabled(CustomComboPreset.DNC_ST_Simple_Tillana))
-                    return Tillana;
+                {
+                    if (gauge.Esprit >= 50)
+                        return SaberDance;
+                    else
+                        return Tillana;
+                }
 
                 // ST Saber Dance
                 if (IsEnabled(CustomComboPreset.DNC_ST_Simple_SaberDance) &&
