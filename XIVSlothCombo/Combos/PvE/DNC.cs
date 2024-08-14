@@ -1,4 +1,6 @@
 ﻿using Dalamud.Game.ClientState.JobGauge.Types;
+using ECommons;
+using ECommons.Logging;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
@@ -399,10 +401,10 @@ namespace XIVSlothCombo.Combos.PvE
                     }
 
                     // ST Feathers & Fans
-                    if (LevelChecked(FanDance1))
+                    if (LevelChecked(FanDance1) && gauge.Feathers > 0)
                     {
                         // FD1 HP% Dump
-                        if (GetTargetHPPercent() <= targetHpThresholdFeather && gauge.Feathers > 0)
+                        if (GetTargetHPPercent() <= targetHpThresholdFeather)
                         {
                             return FanDance1;
                         }
@@ -410,23 +412,22 @@ namespace XIVSlothCombo.Combos.PvE
                         if (Devilment.LevelChecked())
                         {
                             // Burst FD1
-                            if (HasEffect(Buffs.Devilment) && gauge.Feathers > 0)
+                            if (HasEffect(Buffs.Devilment))
                             {
                                 return FanDance1;
                             }
 
                             // FD1 Pooling
-                            if (GetCooldownRemainingTime(Devilment) > 10 && gauge.Feathers > 3 && HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow))
+                            if (GetCooldownRemainingTime(Devilment) > 10 
+                                && gauge.Feathers > 3 
+                                && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow)))
                             {
                                 return FanDance1;
                             }
                         }
                         else
                         {
-                            if (gauge.Feathers > 0)
-                            {
-                                return FanDance1;
-                            }
+                            return FanDance1;
                         }
                     }
 
