@@ -272,14 +272,15 @@ namespace XIVSlothCombo.Combos.PvE
 
                 var needToTech =
                     IsEnabled(CustomComboPreset.DNC_ST_Adv_TS) && // Enabled
-                    GetCooldownRemainingTime(TechnicalStep) < 0.05f && // Up or about to be (some anti-drift)
+                    GetCooldownRemainingTime(TechnicalStep) < (2.5 - 0.5) && // Up or about to be (some anti-drift)
                     !HasEffect(Buffs.StandardStep) && // After Standard
-                    IsOnCooldown(StandardStep) &&
+                    GetCooldownRemainingTime(Devilment) < (6 + 2.5 - 0.5) &&
                     GetTargetHPPercent() > targetHpThresholdTechnical &&// HP% check
                     LevelChecked(TechnicalStep);
 
                 var needToStandardOrFinish =
                     IsEnabled(CustomComboPreset.DNC_ST_Adv_SS) && // Enabled
+                    GetCooldownRemainingTime(StandardStep) < (2.5 - 0.5) && // Up or about to be (some anti-drift)
                     GetTargetHPPercent() > targetHpThresholdStandard && // HP% check
                     (IsOffCooldown(TechnicalStep) || // Checking burst is ready for standard
                      GetCooldownRemainingTime(TechnicalStep) > 5) && // Don't mangle
@@ -287,22 +288,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                 var needToFinish =
                     HasEffect(Buffs.FinishingMoveReady) &&
-                    !HasEffect(Buffs.LastDanceReady) &&
-                    ((GetCooldownRemainingTime(StandardStep) < 0.3f && // About to be up - some more aggressive anti-drift
-                      HasEffect(Buffs.TechnicalFinish)) ||
-                     (!HasEffect(Buffs.TechnicalFinish) && // Anti-Drift outside of Tech
-                      GetCooldownRemainingTime(StandardStep) < 0.05f));
+                    !HasEffect(Buffs.LastDanceReady);
 
                 var needToStandard =
-                    ((!IsEnabled(CustomComboPreset.DNC_ST_Adv_SS_Hold) &&
-                      GetCooldownRemainingTime(StandardStep) < 0.1f) || // Up or about to be (some anti-drift)
-                     IsEnabled(CustomComboPreset.DNC_ST_Adv_SS_Hold) &&
-                     GetCooldownRemainingTime(StandardStep) < gcd) // About to be up next GCD
-                    &&
                     !HasEffect(Buffs.FinishingMoveReady) &&
-                    (IsOffCooldown(Flourish) ||
-                     GetCooldownRemainingTime(Flourish) > 5) &&
-                    !HasEffect(Buffs.TechnicalFinish);
+                    !HasEffect(Buffs.TechnicalFinish) &&
+                    (IsOffCooldown(Flourish) || GetCooldownRemainingTime(Flourish) > 5) &&
+                    (!TechnicalStep.LevelChecked() || GetCooldownRemainingTime(Devilment) > 6);
                 #endregion
 
                 #region Pre-pull
@@ -338,16 +330,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                 #region Dance Fills
                 // ST Standard (Dance) Steps & Fill
-                if ((IsEnabled(CustomComboPreset.DNC_ST_Adv_SS) ||
-                     IsEnabled(CustomComboPreset.DNC_ST_Adv_StandardFill)) &&
-                    HasEffect(Buffs.StandardStep))
+                if (HasEffect(Buffs.StandardStep))
                     return gauge.CompletedSteps < 2
                         ? gauge.NextStep
                         : StandardFinish2;
 
                 // ST Technical (Dance) Steps & Fill
-                if ((IsEnabled(CustomComboPreset.DNC_ST_Adv_TS) || IsEnabled(CustomComboPreset.DNC_ST_Adv_TechFill)) &&
-                    HasEffect(Buffs.TechnicalStep))
+                if (HasEffect(Buffs.TechnicalStep))
                     return gauge.CompletedSteps < 4
                         ? gauge.NextStep
                         : TechnicalFinish4;
@@ -399,6 +388,7 @@ namespace XIVSlothCombo.Combos.PvE
                 // ST Interrupt
                     if (IsEnabled(CustomComboPreset.DNC_ST_Adv_Interrupt) &&
                     CanInterruptEnemy() &&
+                    CanWeave(actionID) &&
                     ActionReady(All.HeadGraze) &&
                     !HasEffect(Buffs.TechnicalFinish))
                     return All.HeadGraze;
@@ -424,7 +414,7 @@ namespace XIVSlothCombo.Combos.PvE
                         // Burst FD3
                         if (HasEffect(Buffs.Devilment))
                         {
-                            return FanDance1;
+                            return FanDance3;
                         }
 
                         // FD3 Pooling
@@ -440,37 +430,26 @@ namespace XIVSlothCombo.Combos.PvE
                     }
 
                     // ST Feathers & Fans
-                    if (LevelChecked(FanDance1))
+                    if (LevelChecked(FanDance1) && gauge.Feathers > 0)
                     {
                         // FD1 HP% Dump
-                        if (GetTargetHPPercent() <= targetHpThresholdFeather && gauge.Feathers > 0)
-                        {
+                        if (GetTargetHPPercent() <= targetHpThresholdFeather)
                             return FanDance1;
-                        }
 
                         if (Devilment.LevelChecked())
                         {
                             // Burst FD1
-                            if (HasEffect(Buffs.Devilment) && gauge.Feathers > 0)
-                            {
-                                return FanDance3;
-                            }
+                            if (HasEffect(Buffs.Devilment))
+                                return FanDance1;
 
                             // FD1 Pooling
-                            if (GetCooldownRemainingTime(Devilment) > 10 
-                                && gauge.Feathers > 3 
+                            if (GetCooldownRemainingTime(Devilment) > 10
+                                && gauge.Feathers > 3
                                 && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow)))
-                            {
                                 return FanDance1;
-                            }
                         }
                         else
-                        {
-                            if (gauge.Feathers > 0)
-                            {
-                                return FanDance1;
-                            }
-                        }
+                            return FanDance1;
                     }
 
                     // ST Panic Heals
@@ -490,6 +469,43 @@ namespace XIVSlothCombo.Combos.PvE
                         ActionReady(Improvisation) &&
                         !HasEffect(Buffs.TechnicalFinish))
                         return Improvisation;
+                }
+                #endregion
+
+                #region BURST
+                if (HasEffect(Buffs.Devilment))
+                {
+                    if (gauge.Esprit >= 85)
+                        return SaberDance;
+
+                    if (HasEffect(Buffs.LastDanceReady))
+                        return LastDance;
+
+                    if (HasEffect(Buffs.FlourishingFinish))
+                    {
+                        if (gauge.Esprit >= 50)
+                            return SaberDance;
+
+                        return Tillana;
+                    }
+
+                    if (HasEffect(Buffs.DanceOfTheDawnReady))
+                        return OriginalHook(DanceOfTheDawn);
+
+                    if (HasEffect(Buffs.FinishingMoveReady) && IsOffCooldown(StandardStep))
+                        return OriginalHook(FinishingMove);
+
+                    if (gauge.Esprit >= 50)
+                        return SaberDance;
+
+                    if (HasEffect(Buffs.FlourishingStarfall))
+                        return StarfallDance;
+
+                    if (flow)
+                        return Fountainfall;
+
+                    if (symmetry)
+                        return ReverseCascade;
                 }
                 #endregion
 
@@ -549,7 +565,12 @@ namespace XIVSlothCombo.Combos.PvE
                 // ST Tillana
                 if (HasEffect(Buffs.FlourishingFinish) &&
                     IsEnabled(CustomComboPreset.DNC_ST_Adv_Tillana))
-                    return Tillana;
+                {
+                    if (gauge.Esprit >= 50)
+                        return SaberDance;
+                    else
+                        return Tillana;
+                }
 
                 // ST Saber Dance
                 if (IsEnabled(CustomComboPreset.DNC_ST_Adv_SaberDance) &&
