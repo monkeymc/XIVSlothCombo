@@ -312,16 +312,13 @@ namespace XIVSlothCombo.Combos.PvE
 
                 #region Dance Fills
                 // ST Standard (Dance) Steps & Fill
-                if ((IsEnabled(CustomComboPreset.DNC_ST_Simple_SS) ||
-                     IsEnabled(CustomComboPreset.DNC_ST_Simple_StandardFill)) &&
-                    HasEffect(Buffs.StandardStep))
+                if (HasEffect(Buffs.StandardStep))
                     return gauge.CompletedSteps < 2
                         ? gauge.NextStep
                         : StandardFinish2;
 
                 // ST Technical (Dance) Steps & Fill
-                if ((IsEnabled(CustomComboPreset.DNC_ST_Simple_TS) || IsEnabled(CustomComboPreset.DNC_ST_Simple_TechFill)) &&
-                    HasEffect(Buffs.TechnicalStep))
+                if (HasEffect(Buffs.TechnicalStep))
                     return gauge.CompletedSteps < 4
                         ? gauge.NextStep
                         : TechnicalFinish4;
