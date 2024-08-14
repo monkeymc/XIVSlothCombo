@@ -461,7 +461,7 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.DanceOfTheDawnReady))
                         return OriginalHook(DanceOfTheDawn);
 
-                    if (HasEffect(Buffs.FinishingMoveReady))
+                    if (HasEffect(Buffs.FinishingMoveReady) && IsOffCooldown(StandardStep))
                         return OriginalHook(FinishingMove);
 
                     if (gauge.Esprit >= 50)
