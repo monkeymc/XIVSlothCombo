@@ -382,27 +382,21 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         // Burst FD3
                         if (HasEffect(Buffs.Devilment))
-                        {
                             Auto(FanDance3);
-                        }
 
                         // FD3 Pooling
                         if (GetCooldownRemainingTime(Devilment) > 15)
-                        {
                             Auto(FanDance3);
-                        }
                     }
 
                     if (HasEffect(Buffs.FourFoldFanDance))
-                    {
                         Auto(FanDance4);
-                    }
 
                     // ST Feathers & Fans
                     if (LevelChecked(FanDance1) && gauge.Feathers > 0)
                     {
                         // FD1 HP% Dump
-                        if (GetTargetHPPercent() <= targetHpThresholdFeather)
+                        if (GetTargetHPPercent() < 10)
                             Auto(FanDance1);
 
                         if (Devilment.LevelChecked())
@@ -414,7 +408,9 @@ namespace XIVSlothCombo.Combos.PvE
                             // FD1 Pooling
                             if (GetCooldownRemainingTime(Devilment) > 10 
                                 && gauge.Feathers > 3 
-                                && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow)))
+                                && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow))
+                                && !WasLastWeaponskill(ReverseCascade)
+                                && !WasLastWeaponskill(Fountainfall))
                                 Auto(FanDance1);
                         }
                         else
@@ -442,7 +438,7 @@ namespace XIVSlothCombo.Combos.PvE
                 #endregion
 
                 #region BURST
-                if (HasEffect(Buffs.Devilment))
+                if (HasEffect(Buffs.Devilment) || GetTargetHPPercent() < 10)
                 {
                     if (gauge.Esprit >= 85)
                         return SaberDance;
@@ -465,10 +461,23 @@ namespace XIVSlothCombo.Combos.PvE
                         return OriginalHook(FinishingMove);
 
                     if (gauge.Esprit >= 50)
+                    {
+                        if (HasEffect(Buffs.FlourishingStarfall) 
+                            && GetBuffRemainingTime(Buffs.Devilment) <= (2.5 + 2.5 - 0.5))
+                            return StarfallDance;
+
                         return SaberDance;
+                    }
 
                     if (HasEffect(Buffs.FlourishingStarfall))
                         return StarfallDance;
+
+                    if (GetBuffRemainingTime(Buffs.Devilment) <= (2.5 + 2.5 - 0.5))
+                    {
+                        if (HasEffect(Buffs.FinishingMoveReady)
+                            && GetBuffRemainingTime(Buffs.Devilment) - GetCooldownRemainingTime(StandardStep) >= 2.5)
+                            return OriginalHook(FinishingMove);
+                    }
 
                     if (flow)
                         return Fountainfall;
