@@ -254,15 +254,15 @@ namespace XIVSlothCombo.Combos.PvE
 
                 var needToTech =
                     IsEnabled(CustomComboPreset.DNC_ST_Simple_TS) && // Enabled
-                    GetCooldownRemainingTime(TechnicalStep) < 0.05 && // Up or about to be (some anti-drift)
+                    GetCooldownRemainingTime(TechnicalStep) < (2.5 - 0.5) && // Up or about to be (some anti-drift)
                     !HasEffect(Buffs.StandardStep) && // After Standard
-                    IsOnCooldown(StandardStep) &&
+                    GetCooldownRemainingTime(Devilment) < (6 + 2.5 - 0.5) &&
                     GetTargetHPPercent() > targetHpThresholdTechnical &&// HP% check
                     LevelChecked(TechnicalStep);
 
                 var needToStandardOrFinish =
                     IsEnabled(CustomComboPreset.DNC_ST_Simple_SS) && // Enabled
-                    GetCooldownRemainingTime(StandardStep) < 0.05 && // Up or about to be (some anti-drift)
+                    GetCooldownRemainingTime(StandardStep) < (2.5 - 0.5) && // Up or about to be (some anti-drift)
                     GetTargetHPPercent() > targetHpThresholdStandard && // HP% check
                     (IsOffCooldown(TechnicalStep) || // Checking burst is ready for standard
                      GetCooldownRemainingTime(TechnicalStep) > 5) && // Don't mangle
@@ -274,9 +274,9 @@ namespace XIVSlothCombo.Combos.PvE
 
                 var needToStandard =
                     !HasEffect(Buffs.FinishingMoveReady) &&
-                    (IsOffCooldown(Flourish) ||
-                     GetCooldownRemainingTime(Flourish) > 5) &&
-                    !HasEffect(Buffs.TechnicalFinish);
+                    !HasEffect(Buffs.TechnicalFinish) &&
+                    (IsOffCooldown(Flourish) || GetCooldownRemainingTime(Flourish) > 5) &&
+                    (!TechnicalStep.LevelChecked() || GetCooldownRemainingTime(Devilment) > 6);
                 #endregion
 
                 #region Pre-pull
@@ -333,7 +333,7 @@ namespace XIVSlothCombo.Combos.PvE
                     (HasEffect(Buffs.TechnicalFinish) ||
                      WasLastAction(TechnicalFinish4) ||
                      !LevelChecked(TechnicalStep)))
-                    return Devilment;
+                    Auto(Devilment);
 
                 // ST Flourish
                 if (IsEnabled(CustomComboPreset.DNC_ST_Simple_Flourish) &&
@@ -352,14 +352,15 @@ namespace XIVSlothCombo.Combos.PvE
                     ((CombatEngageDuration().TotalSeconds < 20 &&
                       HasEffect(Buffs.TechnicalFinish)) ||
                      CombatEngageDuration().TotalSeconds > 20))
-                    return Flourish;
+                    Auto(Flourish);
 
                 // ST Interrupt
                 if (IsEnabled(CustomComboPreset.DNC_ST_Simple_Interrupt) &&
+                    CanWeave(actionID) &&
                     CanInterruptEnemy() &&
                     ActionReady(All.HeadGraze) &&
                     !HasEffect(Buffs.TechnicalFinish))
-                    return All.HeadGraze;
+                    Auto(All.HeadGraze);
 
                 // Variant Cure
                 if (IsEnabled(CustomComboPreset.DNC_Variant_Cure) &&
@@ -382,19 +383,19 @@ namespace XIVSlothCombo.Combos.PvE
                         // Burst FD3
                         if (HasEffect(Buffs.Devilment))
                         {
-                            return FanDance3;
+                            Auto(FanDance3);
                         }
 
                         // FD3 Pooling
                         if (GetCooldownRemainingTime(Devilment) > 15)
                         {
-                            return FanDance3;
+                            Auto(FanDance3);
                         }
                     }
 
                     if (HasEffect(Buffs.FourFoldFanDance))
                     {
-                        return FanDance4;
+                        Auto(FanDance4);
                     }
 
                     // ST Feathers & Fans
@@ -402,30 +403,22 @@ namespace XIVSlothCombo.Combos.PvE
                     {
                         // FD1 HP% Dump
                         if (GetTargetHPPercent() <= targetHpThresholdFeather)
-                        {
-                            return FanDance1;
-                        }
+                            Auto(FanDance1);
 
                         if (Devilment.LevelChecked())
                         {
                             // Burst FD1
                             if (HasEffect(Buffs.Devilment))
-                            {
-                                return FanDance1;
-                            }
+                                Auto(FanDance1);
 
                             // FD1 Pooling
                             if (GetCooldownRemainingTime(Devilment) > 10 
                                 && gauge.Feathers > 3 
                                 && (HasEffect(Buffs.SilkenSymmetry) || HasEffect(Buffs.SilkenFlow)))
-                            {
-                                return FanDance1;
-                            }
+                                Auto(FanDance1);
                         }
                         else
-                        {
-                            return FanDance1;
-                        }
+                            Auto(FanDance1);
                     }
 
                     // ST Panic Heals
