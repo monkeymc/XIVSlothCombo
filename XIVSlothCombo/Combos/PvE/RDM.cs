@@ -82,8 +82,6 @@ namespace XIVSlothCombo.Combos.PvE
             // public const short placeholder = 0;
         }
 
-
-
         public static class Traits
         {
             public const uint
@@ -667,10 +665,17 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(All.Buffs.Swiftcast) && IsEnabled(CustomComboPreset.SMN_Variant_Raise) && IsEnabled(Variant.VariantRaise))
                         return Variant.VariantRaise;
 
-                    if (LevelChecked(Verraise) &&
-                        (GetCooldownRemainingTime(All.Swiftcast) > 0 ||     // Condition 1: Swiftcast is on cooldown
-                        HasEffect(Buffs.Dualcast)))                              // Condition 2: Swiftcast is available, but we have Dualcast)
-                        return Verraise;
+                    if (LevelChecked(Verraise))
+                    {
+                        bool schwifty = HasEffect(All.Buffs.Swiftcast);
+                        if (schwifty || HasEffect(Buffs.Dualcast)) return Verraise;
+                        if (IsEnabled(CustomComboPreset.RDM_Raise_Vercure) &&
+                            !schwifty &&
+                            ActionReady(Vercure) &&
+                            IsOnCooldown(All.Swiftcast))
+                            return Vercure;
+                    }
+
                 }
 
                 // Else we just exit normally and return Swiftcast
