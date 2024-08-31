@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.JobGauge.Types;
 using ECommons;
 using ECommons.Logging;
+using Lumina.Excel.GeneratedSheets;
 using XIVSlothCombo.Combos.PvE.Content;
 using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
@@ -265,7 +266,7 @@ namespace XIVSlothCombo.Combos.PvE
                     GetCooldownRemainingTime(StandardStep) < (2.5 - 0.5) && // Up or about to be (some anti-drift)
                     GetTargetHPPercent() > targetHpThresholdStandard && // HP% check
                     (IsOffCooldown(TechnicalStep) || // Checking burst is ready for standard
-                     GetCooldownRemainingTime(TechnicalStep) > 5) && // Don't mangle
+                     GetCooldownRemainingTime(Devilment) >= (4 + 6 + 2.5 - 0.5)) && // Don't mangle
                     LevelChecked(StandardStep);
 
                 var needToFinish =
@@ -276,52 +277,33 @@ namespace XIVSlothCombo.Combos.PvE
                     !HasEffect(Buffs.FinishingMoveReady) &&
                     !HasEffect(Buffs.TechnicalFinish) &&
                     (IsOffCooldown(Flourish) || GetCooldownRemainingTime(Flourish) > 5) &&
-                    (!TechnicalStep.LevelChecked() || GetCooldownRemainingTime(Devilment) > 6);
-                #endregion
-
-                #region Pre-pull
-
-                if (!InCombat())
-                {
-                    // ST Standard Step (Pre-pull)
-                    if (IsEnabled(CustomComboPreset.DNC_ST_Simple_SS_Prepull) &&
-                        ActionReady(StandardStep) &&
-                        !HasEffect(Buffs.FinishingMoveReady) &&
-                        !HasEffect(Buffs.TechnicalFinish) &&
-                        IsOffCooldown(TechnicalStep) &&
-                        IsOffCooldown(StandardStep) &&
-                        !HasTarget())
-                        return StandardStep;
-
-                    // ST Standard Steps (Pre-pull)
-                    if ((IsEnabled(CustomComboPreset.DNC_ST_Simple_SS) ||
-                         IsEnabled(CustomComboPreset.DNC_ST_Simple_StandardFill) ||
-                         IsEnabled(CustomComboPreset.DNC_ST_Simple_SS_Prepull)) &&
-                        HasEffect(Buffs.StandardStep) &&
-                        gauge.CompletedSteps < 2 &&
-                        !HasTarget())
-                        return gauge.NextStep;
-
-                    // ST Peloton
-                    if (IsEnabled(CustomComboPreset.DNC_ST_Simple_Peloton) &&
-                        !HasEffectAny(Buffs.Peloton) &&
-                        GetBuffRemainingTime(Buffs.StandardStep) > 5)
-                        return Peloton;
-                }
+                    (!TechnicalStep.LevelChecked() || GetCooldownRemainingTime(Devilment) > (2.5 + 4 + 6 + 2.5 - 0.5));
                 #endregion
 
                 #region Dance Fills
                 // ST Standard (Dance) Steps & Fill
                 if (HasEffect(Buffs.StandardStep))
-                    return gauge.CompletedSteps < 2
-                        ? gauge.NextStep
-                        : StandardFinish2;
+                {
+                    if (gauge.CompletedSteps < 2)
+                        return gauge.NextStep;
+
+                    if (HasBattleTarget() && InActionRange(StandardFinish2))
+                        return StandardFinish2;
+                    else
+                        return DRG.Stardiver;
+                }
 
                 // ST Technical (Dance) Steps & Fill
                 if (HasEffect(Buffs.TechnicalStep))
-                    return gauge.CompletedSteps < 4
-                        ? gauge.NextStep
-                        : TechnicalFinish4;
+                {
+                    if (gauge.CompletedSteps < 4)
+                        return gauge.NextStep;
+
+                    if (HasBattleTarget() && InActionRange(TechnicalFinish4) && GetCooldownRemainingTime(Devilment) < 1)
+                        return TechnicalFinish4;
+                    else
+                        return DRG.Stardiver;
+                }
                 #endregion
 
                 #region Weaves
@@ -437,9 +419,27 @@ namespace XIVSlothCombo.Combos.PvE
                 }
                 #endregion
 
-                #region BURST
-                if (HasEffect(Buffs.Devilment) || GetTargetHPPercent() < 10)
+                #region GCD
+                // ST Technical Step
+                if (IsEnabled(CustomComboPreset.DNC_ST_Simple_TS)
+                    && TechnicalStep.LevelChecked()
+                    && (GetCooldownRemainingTime(Devilment) <= (1 + 1 * 4 + 1) + GetCooldownRemainingTime(Cascade) + 2.5))
                 {
+                    return TechnicalStep;
+                }
+
+                #region BURST
+                if ((HasEffect(Buffs.Devilment) && GetBuffRemainingTime(Buffs.Devilment) < 20) || GetTargetHPPercent() < 10)
+                {
+                    if (HasEffect(Buffs.FinishingMoveReady)
+                        && !HasEffect(Buffs.LastDanceReady)
+                        && GetCooldownRemainingTime(StandardStep) < 0.5
+                        && GetBuffRemainingTime(Buffs.FinishingMoveReady) <= 2.5 + GetCooldownRemainingTime(Cascade)
+                        && InActionRange(OriginalHook(FinishingMove)))
+                    {
+                        return OriginalHook(FinishingMove);
+                    }
+
                     if (gauge.Esprit >= 85)
                         return SaberDance;
 
@@ -451,13 +451,14 @@ namespace XIVSlothCombo.Combos.PvE
                         if (gauge.Esprit >= 50)
                             return SaberDance;
 
-                        return Tillana;
+                        if (InActionRange(Tillana))
+                            return Tillana;
                     }
 
-                    if (HasEffect(Buffs.DanceOfTheDawnReady))
+                    if (HasEffect(Buffs.DanceOfTheDawnReady) && !HasEffect(Buffs.FourFoldFanDance) && !HasEffect(Buffs.FlourishingFinish))
                         return OriginalHook(DanceOfTheDawn);
 
-                    if (HasEffect(Buffs.FinishingMoveReady) && IsOffCooldown(StandardStep))
+                    if (HasEffect(Buffs.FinishingMoveReady) && IsOffCooldown(StandardStep) && HasBattleTarget() && InActionRange(OriginalHook(FinishingMove)))
                         return OriginalHook(FinishingMove);
 
                     if (gauge.Esprit >= 50)
@@ -472,11 +473,12 @@ namespace XIVSlothCombo.Combos.PvE
                     if (HasEffect(Buffs.FlourishingStarfall))
                         return StarfallDance;
 
-                    if (GetBuffRemainingTime(Buffs.Devilment) <= (2.5 + 2.5 - 0.5))
+                    if (HasEffect(Buffs.FinishingMoveReady)
+                        && InActionRange(OriginalHook(FinishingMove))
+                        && GetBuffRemainingTime(Buffs.Devilment) < 5
+                        && GetCooldownRemainingTime(StandardStep) <= GetBuffRemainingTime(Buffs.Devilment))
                     {
-                        if (HasEffect(Buffs.FinishingMoveReady)
-                            && GetBuffRemainingTime(Buffs.Devilment) - GetCooldownRemainingTime(StandardStep) >= 2.5)
-                            return OriginalHook(FinishingMove);
+                        return OriginalHook(FinishingMove);
                     }
 
                     if (flow)
@@ -486,11 +488,6 @@ namespace XIVSlothCombo.Combos.PvE
                         return ReverseCascade;
                 }
                 #endregion
-
-                #region GCD
-                // ST Technical Step
-                if (needToTech)
-                    return TechnicalStep;
 
                 // ST Last Dance
                 if (IsEnabled(CustomComboPreset.DNC_ST_Simple_LD) && // Enabled
@@ -503,12 +500,29 @@ namespace XIVSlothCombo.Combos.PvE
                     return LastDance;
 
                 // ST Standard Step (Finishing Move)
-                if (needToStandardOrFinish && needToFinish)
+                // if (needToStandardOrFinish && needToFinish)
+                if (HasEffect(Buffs.FinishingMoveReady) 
+                    && !HasEffect(Buffs.LastDanceReady)
+                    && GetCooldownRemainingTime(StandardStep) < 0.5
+                    && (
+                    (GetCooldownRemainingTime(Devilment) > GetBuffRemainingTime(Buffs.FinishingMoveReady))
+                    || (GetBuffRemainingTime(Buffs.FinishingMoveReady) >= GetCooldownRemainingTime(Devilment) + GetCooldownRemainingTime(Cascade) + 2.5)
+                    )
+                    && InActionRange(OriginalHook(FinishingMove)))
+                {
                     return OriginalHook(FinishingMove);
+                }
 
                 // ST Standard Step
-                if (needToStandardOrFinish && needToStandard)
+                // if (needToStandardOrFinish && needToStandard)
+                if (IsEnabled(CustomComboPreset.DNC_ST_Simple_SS)
+                    && StandardStep.LevelChecked()
+                    && GetCooldownRemainingTime(StandardStep) - GetCooldownRemainingTime(Cascade) <= (2.5 - 0.5)
+                    && (!TechnicalStep.LevelChecked() || GetCooldownRemainingTime(Devilment) >= (1 + 1 * 4 + 1) + (1 + 1 * 2 + 1) + GetCooldownRemainingTime(Cascade))
+                    && !HasEffect(Buffs.FinishingMoveReady))
+                {
                     return StandardStep;
+                }
 
                 // Emergency Starfall usage
                 if (HasEffect(Buffs.FlourishingStarfall) &&
@@ -517,7 +531,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                 // ST Dance of the Dawn
                 if (IsEnabled(CustomComboPreset.DNC_ST_Simple_DawnDance) &&
-                    HasEffect(Buffs.DanceOfTheDawnReady) &&
+                    HasEffect(Buffs.DanceOfTheDawnReady) && !HasEffect(Buffs.FourFoldFanDance) && !HasEffect(Buffs.FlourishingFinish) &&
                     LevelChecked(DanceOfTheDawn) &&
                     (GetCooldownRemainingTime(TechnicalStep) > 5 ||
                      IsOffCooldown(TechnicalStep)) && // Tech is up
@@ -541,7 +555,7 @@ namespace XIVSlothCombo.Combos.PvE
                 {
                     if (gauge.Esprit >= 50)
                         return SaberDance;
-                    else
+                    else if (HasBattleTarget() && InActionRange(Tillana))
                         return Tillana;
                 }
 

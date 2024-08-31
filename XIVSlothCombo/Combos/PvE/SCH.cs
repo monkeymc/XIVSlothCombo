@@ -294,7 +294,7 @@ namespace XIVSlothCombo.Combos.PvE
                         if (IsEnabled(CustomComboPreset.SCH_DeploymentTactics_Recitation) && ActionReady(Recitation))
                             return Recitation;
 
-                        if (ActionReady(FeyIllumination) && !(Gauge.SeraphTimer > 0))
+                        if (ActionReady(FeyIllumination) && HasPetPresent() && Gauge.SeraphTimer == 0)
                             return FeyIllumination;
 
                         if (ActionReady(25867))
@@ -381,20 +381,6 @@ namespace XIVSlothCombo.Combos.PvE
                     //Target based options
                     if (HasBattleTarget())
                     {
-                        // Energy Drain
-                        if (IsEnabled(CustomComboPreset.SCH_DPS_EnergyDrain))
-                        {
-                            float edTime = Config.SCH_ST_DPS_EnergyDrain_Adv ? Config.SCH_ST_DPS_EnergyDrain : 10f;
-                            if (LevelChecked(EnergyDrain) && InCombat() &&
-                                Gauge.HasAetherflow() &&
-                                GetCooldownRemainingTime(Aetherflow) <= edTime &&
-                                (!IsEnabled(CustomComboPreset.SCH_DPS_EnergyDrain_BurstSaver) || (LevelChecked(ChainStratagem) && GetCooldownRemainingTime(ChainStratagem) > 10) || (!ChainStratagem.LevelChecked())) &&
-                                CanSpellWeave(actionID))
-                            {
-                                Auto(EnergyDrain);
-                            }
-                        }
-
                         // Chain Stratagem
                         if (IsEnabled(CustomComboPreset.SCH_DPS_ChainStrat))
                         {
@@ -417,7 +403,20 @@ namespace XIVSlothCombo.Combos.PvE
                             }
                             // Don't use OriginalHook(ChainStratagem), because player can disable ingame action replacement
                         }
-                        
+
+                        // Energy Drain
+                        if (IsEnabled(CustomComboPreset.SCH_DPS_EnergyDrain))
+                        {
+                            float edTime = Config.SCH_ST_DPS_EnergyDrain_Adv ? Config.SCH_ST_DPS_EnergyDrain : 10f;
+                            if (LevelChecked(EnergyDrain) && InCombat() &&
+                                Gauge.HasAetherflow() &&
+                                GetCooldownRemainingTime(Aetherflow) <= edTime &&
+                                (!IsEnabled(CustomComboPreset.SCH_DPS_EnergyDrain_BurstSaver) || (LevelChecked(ChainStratagem) && GetCooldownRemainingTime(ChainStratagem) > 10) || (!ChainStratagem.LevelChecked())) &&
+                                CanSpellWeave(actionID))
+                            {
+                                Auto(EnergyDrain);
+                            }
+                        }
 
                         //Bio/Biolysis
                         if (IsEnabled(CustomComboPreset.SCH_DPS_Bio) && LevelChecked(Bio) && InCombat())
@@ -504,7 +503,7 @@ namespace XIVSlothCombo.Combos.PvE
                 if (actionID is Succor)
                 {
                     // FeyBlessing
-                    if (ActionReady(FeyBlessing) && !(Gauge.SeraphTimer > 0))
+                    if (ActionReady(FeyBlessing) && HasPetPresent() && Gauge.SeraphTimer == 0)
                         return OriginalHook(FeyBlessing);
 
                     // Aetherflow
