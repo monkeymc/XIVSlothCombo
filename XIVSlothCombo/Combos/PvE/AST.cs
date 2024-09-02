@@ -210,70 +210,82 @@ namespace XIVSlothCombo.Combos.PvE
                         IsEnabled(CustomComboPreset.AST_AoE_DPS) && GravityList.Contains(actionID))
                         return Variant.VariantSpiritDart;
 
-                    if (IsEnabled(CustomComboPreset.AST_DPS_LightSpeed) &&
-                        ActionReady(Lightspeed) &&
-                        GetTargetHPPercent() > Config.AST_DPS_LightSpeedOption &&
-                        IsMoving &&
-                        !HasEffect(Buffs.Lightspeed))
+                    if (CanSpellWeave(actionID))
                     {
-                        Auto(Lightspeed);
-                    }
+                        if (ActionReady(Lightspeed) && (IsMoving || HasEffectAny(Buffs.Divination)) && !HasEffect(Buffs.Lightspeed))
+                        {
+                            Auto(Lightspeed);
+                        }
 
-                    if (IsEnabled(CustomComboPreset.AST_DPS_Lucid) &&
-                        ActionReady(All.LucidDreaming) &&
-                        LocalPlayer.CurrentMp <= Config.AST_LucidDreaming &&
-                        CanSpellWeave(actionID))
-                    {
-                        Auto(All.LucidDreaming);
-                    }
+                        if (ActionReady(All.LucidDreaming) && LocalPlayer.CurrentMp <= 8_000)
+                        {
+                            Auto(All.LucidDreaming);
+                        }
 
+                        //Play Card
+                        if (ActionReady(Play1) && Gauge.DrawnCards[0] is not CardType.NONE)
+                        {
+                            return OriginalHook(Play1);
+                        }
 
-                    //Play Card
-                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoPlay) &&
-                        ActionReady(Play1) &&
-                        Gauge.DrawnCards[0] is not CardType.NONE &&
-                        CanSpellWeave(actionID) &&
-                        spellsSinceDraw >= Config.AST_ST_DPS_Play_SpeedSetting)
-                    {
-                        Auto(Play1);
-                    }
+                        //Card Draw
+                        if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) && ActionReady(OriginalHook(AstralDraw)) 
+                            && (Gauge.DrawnCards.All(x => x is CardType.NONE) || (DrawnCard == CardType.NONE && Config.AST_ST_DPS_OverwriteCards)))
+                        {
+                            Auto(AstralDraw);
+                        }
 
-                    //Card Draw
-                    if (IsEnabled(CustomComboPreset.AST_DPS_AutoDraw) &&
-                        ActionReady(OriginalHook(AstralDraw)) &&
-                        (Gauge.DrawnCards.All(x => x is CardType.NONE) || (DrawnCard == CardType.NONE && Config.AST_ST_DPS_OverwriteCards)))
-                    // && CanDelayedWeave(actionID))
-                    {
-                        Auto(AstralDraw);
-                    }
+                        //Divination
+                        if (IsEnabled(CustomComboPreset.AST_DPS_Divination) && ActionReady(Divination) && !HasEffectAny(Buffs.Divination))
+                        {
+                            if (CanDelayedWeave(actionID))
+                            {
+                                Auto(Divination);
+                            }
+                        }
 
-                    //Divination
-                    if (IsEnabled(CustomComboPreset.AST_DPS_Divination) &&
-                        ActionReady(Divination) &&
-                        !HasEffectAny(Buffs.Divination) && //Overwrite protection
-                        GetTargetHPPercent() > Config.AST_DPS_DivinationOption &&
-                        ActionWatching.NumberOfGcdsUsed >= 3)
-                    {
-                        if (CanDelayedWeave(actionID))
+                        if (ActionReady(Divination) && ActionReady(Divination) && !HasEffectAny(Buffs.Divination) 
+                            && (HasEffectAny(3685) 
+                            || TargetHasEffectAny(SCH.Debuffs.ChainStratagem)))
                         {
                             Auto(Divination);
                         }
-                    }
 
-                    if (IsEnabled(CustomComboPreset.AST_DPS_Oracle) &&
-                        HasEffect(Buffs.Divining) &&
-                        CanSpellWeave(actionID))
-                    {
-                        Auto(Oracle);
-                    }
+                        if (HasEffect(Buffs.Divining))
+                        {
+                            Auto(Oracle);
+                        }
 
-                    //Minor Arcana / Lord of Crowns
-                    if (ActionReady(OriginalHook(MinorArcana)) &&
-                        IsEnabled(CustomComboPreset.AST_DPS_LazyLord) && Gauge.DrawnCrownCard is CardType.LORD &&
-                        HasBattleTarget() &&
-                        CanDelayedWeave(actionID))
-                    {
-                        Auto(MinorArcana);
+                        //Minor Arcana / Lord of Crowns
+                        if (ActionReady(OriginalHook(MinorArcana)) &&
+                            IsEnabled(CustomComboPreset.AST_DPS_LazyLord) && Gauge.DrawnCrownCard is CardType.LORD &&
+                            HasBattleTarget())
+                        {
+                            Auto(MinorArcana);
+                        }
+
+                        if (IsInParty()
+                            && GetPartySlot(2) != null
+                            && IsInRange(GetPartySlot(2))
+                            && GetTargetHPPercent(GetPartySlot(2)) > 0
+                            && GetTargetHPPercent(GetPartySlot(2)) < 100
+                            )
+                        {
+                            if (Gauge.DrawnCards[2] == CardType.SPIRE)
+                                return OriginalHook(Play3);
+
+                            if (CelestialIntersection.LevelChecked() && HasCharges(CelestialIntersection))
+                                return CelestialIntersection;
+
+                            if (Gauge.DrawnCards[1] == CardType.ARROW)
+                                return OriginalHook(Play2);
+
+                            if (Gauge.DrawnCards[2] == CardType.EWER)
+                                return OriginalHook(Play3);
+
+                            if (Gauge.DrawnCards[1] == CardType.BOLE)
+                                return OriginalHook(Play2);
+                        }
                     }
 
                     if (HasBattleTarget())
@@ -295,50 +307,15 @@ namespace XIVSlothCombo.Combos.PvE
                                 return Variant.VariantSpiritDart;
 
 
-                            if ((dotDebuff is null || dotDebuff.RemainingTime <= refreshtimer) &&
-                                GetTargetHPPercent() > Config.AST_DPS_CombustOption)
+                            if ((dotDebuff is null || dotDebuff.RemainingTime <= 3))
+                                return dot;
+
+                            if (HasEffectAny(Buffs.Divination) && GetBuffRemainingTime(Buffs.Divination) < 5 && dotDebuff.RemainingTime < 15 && !JustUsed(dot))
                                 return dot;
 
                             //AlterateMode idles as Malefic
                             if (AlternateMode) return OriginalHook(Malefic);
                         }
-                    }
-                }
-
-                if (actionID == Exaltation)
-                {
-                    if (Gauge.DrawnCards[1] == CardType.BOLE)
-                    {
-                        return OriginalHook(Play2);
-                    }
-                }
-
-                if (actionID == CelestialIntersection)
-                {
-                    if (Gauge.DrawnCards[1] == CardType.EWER)
-                    {
-                        return OriginalHook(Play2);
-                    }
-
-                    if (Gauge.DrawnCards[2] == CardType.SPIRE)
-                    {
-                        return OriginalHook(Play3);
-                    }
-                }
-
-                if (actionID == Synastry)
-                {
-                    if (Gauge.DrawnCards[1] == CardType.ARROW)
-                    {
-                        return OriginalHook(Play2);
-                    }
-                }
-
-                if (actionID == AspectedBenefic)
-                {
-                    if (Gauge.DrawnCards[2] == CardType.EWER)
-                    {
-                        return OriginalHook(Play3);
                     }
                 }
 

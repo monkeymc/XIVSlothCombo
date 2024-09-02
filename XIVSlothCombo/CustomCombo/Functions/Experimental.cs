@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ECommons.Automation;
+using ECommons.DalamudServices;
 using XIVSlothCombo.Data;
-using XIVSlothCombo.Window.Functions;
-using static XIVSlothCombo.Data.ActionWatching;
+using XIVSlothCombo.Services;
 
 namespace XIVSlothCombo.CustomComboNS.Functions
 {
