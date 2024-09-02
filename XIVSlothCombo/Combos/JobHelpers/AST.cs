@@ -157,7 +157,7 @@ namespace XIVSlothCombo.Combos.JobHelpers
 
                 if (PartyTargets.Count > 0)
                 {
-                    PartyTargets.Shuffle();
+                    // PartyTargets.Shuffle();
                     //Give card to DPS first
                     for (int i = 0; i <= PartyTargets.Count - 1; i++)
                     {
