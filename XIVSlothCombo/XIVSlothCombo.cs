@@ -21,6 +21,7 @@ using XIVSlothCombo.Combos;
 using XIVSlothCombo.Combos.PvE;
 using XIVSlothCombo.Combos.PvP;
 using XIVSlothCombo.Core;
+using XIVSlothCombo.CustomComboNS.Functions;
 using XIVSlothCombo.Data;
 using XIVSlothCombo.Services;
 using XIVSlothCombo.Window;
@@ -411,6 +412,12 @@ namespace XIVSlothCombo
                             Svc.Chat.Print($"{(int)preset} - {preset}");
                         }
 
+                        break;
+                    }
+
+                case "ogcd":
+                    {
+                        CustomComboFunctions.Next(argumentsParts);
                         break;
                     }
 

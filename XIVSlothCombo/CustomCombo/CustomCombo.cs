@@ -67,7 +67,7 @@ namespace XIVSlothCombo.CustomComboNS
             if (resultingActionID == 0 || actionID == resultingActionID)
                 return false;
 
-            newActionID = resultingActionID;
+            newActionID = Invoke(resultingActionID);
 
             return true;
         }

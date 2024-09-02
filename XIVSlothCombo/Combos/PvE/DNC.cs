@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.JobGauge.Types;
 using XIVSlothCombo.Combos.PvE.Content;
-using XIVSlothCombo.Core;
 using XIVSlothCombo.CustomComboNS;
 using XIVSlothCombo.CustomComboNS.Functions;
 using XIVSlothCombo.Extensions;
@@ -602,7 +601,7 @@ namespace XIVSlothCombo.Combos.PvE
             }
         }
 
-        internal class DNC_ST_MultiButton : CustomCombo
+        /*internal class DNC_ST_MultiButton : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.DNC_ST_MultiButton;
 
@@ -656,7 +655,7 @@ namespace XIVSlothCombo.Combos.PvE
 
                 return actionID;
             }
-        }
+        }*/
 
         internal class DNC_AoE_AdvancedMode : CustomCombo
         {
