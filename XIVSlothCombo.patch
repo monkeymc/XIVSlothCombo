@@ -1,0 +1,101 @@
+Subject: [PATCH] - Toggleable
+- SET/UNSET with color
+- Copy preset button
+---
+Index: XIVSlothCombo/XIVSlothCombo.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
+--- a/XIVSlothCombo/XIVSlothCombo.cs	(revision 467f5bd0766fe8164f23827994d4eabaafbdbdc0)
++++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1728813839828)
+@@ -16,6 +16,7 @@
+ using System.Net.Http;
+ using System.Reflection;
+ using System.Threading.Tasks;
++using ECommons.ChatMethods;
+ using XIVSlothCombo.Attributes;
+ using XIVSlothCombo.Combos;
+ using XIVSlothCombo.Combos.PvE;
+@@ -283,7 +284,7 @@
+ 
+                 case "set": // set a feature
+                     {
+-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
++                        if (true)
+                         {
+                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
+                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
+@@ -308,7 +309,7 @@
+ 
+                 case "toggle": // toggle a feature
+                     {
+-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
++                        if (true)
+                         {
+                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
+                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
+@@ -319,11 +320,17 @@
+                                 if (!Service.Configuration.EnabledActions.Remove(preset))
+                                 {
+                                     Service.Configuration.EnabledActions.Add(preset);
+-                                    Svc.Chat.Print($"{preset} SET");
++                                    Svc.Chat.Print(new SeStringBuilder()
++                                        .Append($"{preset} ")
++                                        .AddUiForeground("SET", (ushort)UIColor.Green)
++                                        .Build());
+                                 }
+                                 else
+                                 {
+-                                    Svc.Chat.Print($"{preset} UNSET");
++                                    Svc.Chat.Print(new SeStringBuilder()
++                                        .Append($"{preset} ")
++                                        .AddUiForeground("UNSET", (ushort)UIColor.Red)
++                                        .Build());
+                                 }
+                             }
+ 
+@@ -340,7 +347,7 @@
+ 
+                 case "unset": // unset a feature
+                     {
+-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
++                        if (true)
+                         {
+                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
+                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
+Index: XIVSlothCombo/Window/Functions/Presets.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/Window/Functions/Presets.cs b/XIVSlothCombo/Window/Functions/Presets.cs
+--- a/XIVSlothCombo/Window/Functions/Presets.cs	(revision 467f5bd0766fe8164f23827994d4eabaafbdbdc0)
++++ b/XIVSlothCombo/Window/Functions/Presets.cs	(date 1728814746379)
+@@ -11,6 +11,8 @@
+ using System.Numerics;
+ using System.Reflection.Emit;
+ using System.Text;
++using Dalamud.Game.Text.SeStringHandling;
++using ECommons.ChatMethods;
+ using XIVSlothCombo.Attributes;
+ using XIVSlothCombo.Combos;
+ using XIVSlothCombo.Core;
+@@ -68,6 +70,16 @@
+ 
+             ImGui.Spacing();
+ 
++            if (ImGui.Button($"{preset}"))
++            {
++                var text = $"/scombo toggle {preset}";
++                Svc.Chat.Print(new SeStringBuilder()
++                    .Append($"{text} ")
++                    .AddUiForeground("copied", (ushort)UIColor.Green)
++                    .Build());
++                ImGui.SetClipboardText(text);
++            }
++
+             if (ImGui.Checkbox($"{info.FancyName}###{preset}{i}", ref enabled))
+             {
+                 if (enabled)
