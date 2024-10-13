@@ -1,8 +1,10 @@
-﻿using XIVSlothCombo.CustomComboNS;
+﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using XIVSlothCombo.Combos.PvE;
+using XIVSlothCombo.CustomComboNS;
 
 namespace XIVSlothCombo.Combos.PvP
 {
-    internal static class MNKPvP
+    internal class MNKPvP
     {
         public const byte ClassID = 2;
         public const byte JobID = 20;
@@ -37,7 +39,7 @@ namespace XIVSlothCombo.Combos.PvP
             public const ushort
                 PressurePoint = 3172;
         }
-
+        
         internal class MNKPvP_Burst : CustomCombo
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.MNKPvP_Burst;
@@ -46,7 +48,8 @@ namespace XIVSlothCombo.Combos.PvP
             {
                 if (actionID is Bootshine or TrueStrike or SnapPunch or DragonKick or TwinSnakes or Demolish or PhantomRush)
                 {
-
+                    return IMNKPvP.IMNKPvP_Burst.invoke(actionID, lastComboMove, comboTime, level);
+                    
                     if (!TargetHasEffectAny(PvPCommon.Buffs.Guard))
                     {
                         if (IsEnabled(CustomComboPreset.MNKPvP_Burst_RiddleOfEarth) && IsOffCooldown(RiddleOfEarth) && PlayerHealthPercentageHp() <= 95)

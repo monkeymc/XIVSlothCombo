@@ -3,6 +3,7 @@ using Dalamud.Interface.Components;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
+using ECommons.ChatMethods;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using ImGuiNET;
@@ -67,6 +68,12 @@ namespace XIVSlothCombo.Window.Functions
             var eurekaParents = Attributes[preset].EurekaParent;
 
             ImGui.Spacing();
+
+            if (ImGui.Button($"{preset}"))
+            {
+                ImGui.SetClipboardText($"/scombo toggle {preset}");
+                ChatPrinter.Green($"{preset} Copied");
+            }
 
             if (ImGui.Checkbox($"{info.FancyName}###{i}", ref enabled))
             {

@@ -21,6 +21,7 @@ using XIVSlothCombo.Combos;
 using XIVSlothCombo.Combos.PvE;
 using XIVSlothCombo.Combos.PvP;
 using XIVSlothCombo.Core;
+using XIVSlothCombo.CustomComboNS.Functions;
 using XIVSlothCombo.Data;
 using XIVSlothCombo.Services;
 using XIVSlothCombo.Window;
@@ -283,7 +284,7 @@ namespace XIVSlothCombo
 
                 case "set": // set a feature
                     {
-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+                        if (true)
                         {
                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
@@ -308,7 +309,7 @@ namespace XIVSlothCombo
 
                 case "toggle": // toggle a feature
                     {
-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+                        if (true)
                         {
                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
@@ -340,7 +341,7 @@ namespace XIVSlothCombo
 
                 case "unset": // unset a feature
                     {
-                        if (!Svc.Condition[Dalamud.Game.ClientState.Conditions.ConditionFlag.InCombat])
+                        if (true)
                         {
                             string? targetPreset = argumentsParts[1].ToLowerInvariant();
                             foreach (CustomComboPreset preset in Enum.GetValues<CustomComboPreset>())
@@ -411,6 +412,12 @@ namespace XIVSlothCombo
                             Svc.Chat.Print($"{(int)preset} - {preset}");
                         }
 
+                        break;
+                    }
+
+                case "ogcd":
+                    {
+                        CustomComboFunctions.Next(argumentsParts);
                         break;
                     }
 

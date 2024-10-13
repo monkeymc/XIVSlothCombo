@@ -7,7 +7,7 @@ using XIVSlothCombo.Services;
 
 namespace XIVSlothCombo.Combos.PvE
 {
-    internal static class DNC
+    internal class DNC
     {
         public const byte JobID = 38;
 
@@ -565,6 +565,7 @@ namespace XIVSlothCombo.Combos.PvE
 
             protected override uint Invoke(uint actionID, uint lastComboMove, float comboTime, byte level)
             {
+                return IADV.CustomCombo.ST(actionID, lastComboMove, comboTime, level);
                 if (actionID is Cascade)
                 {
                     #region Types

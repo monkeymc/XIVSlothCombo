@@ -35,7 +35,7 @@ namespace XIVSlothCombo.CustomComboNS.Functions
         /// <summary> Gets a value indicating whether an action is off cooldown. </summary>
         /// <param name="actionID"> Action ID to check. </param>
         /// <returns> True or false. </returns>
-        public static bool IsOffCooldown(uint actionID) => !GetCooldown(actionID).IsCooldown;
+        // public static bool IsOffCooldown(uint actionID) => !GetCooldown(actionID).IsCooldown;
 
         /// <summary> Check if the Cooldown was just used. </summary>
         /// <param name="actionID"> Action ID to check. </param>

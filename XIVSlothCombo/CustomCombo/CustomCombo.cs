@@ -61,7 +61,7 @@ namespace XIVSlothCombo.CustomComboNS
                 JobID != classJobID && ClassID != classJobID)
                 return false;
 
-            uint resultingActionID = Invoke(actionID, lastComboMove, comboTime, level);
+            uint resultingActionID = Invoke(Invoke(actionID, lastComboMove, comboTime, level));
             //Dalamud.Logging.PluginLog.Debug(resultingActionID.ToString());
 
             if (resultingActionID == 0 || actionID == resultingActionID)

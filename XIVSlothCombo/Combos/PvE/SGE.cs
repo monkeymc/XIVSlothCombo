@@ -380,6 +380,9 @@ namespace XIVSlothCombo.Combos.PvE
                         ActionReady(Druochole) && Gauge.Addersgall >= Config.SGE_ST_DPS_AddersgallProtect)
                         return Druochole;
 
+                    if (HasEffect(3898) && ActionReady(Soteria))
+                        return Soteria;
+
                     if (HasBattleTarget() && !HasEffect(Buffs.Eukrasia))
                     // Buff check Above. Without it, Toxikon and any future option will interfere in the Eukrasia->Eukrasia Dosis combo
                     {
@@ -552,7 +555,12 @@ namespace XIVSlothCombo.Combos.PvE
                 if (actionID is Prognosis)
                 {
                     if (IsEnabled(CustomComboPreset.SGE_AoE_Heal_EPrognosis) && HasEffect(Buffs.Eukrasia))
+                    {
+                        if (ActionReady(Zoe))
+                            return Zoe;
+
                         return OriginalHook(Prognosis);
+                    }
 
                     if (IsEnabled(CustomComboPreset.SGE_AoE_Heal_Rhizomata) && ActionReady(Rhizomata) &&
                         !Gauge.HasAddersgall())
@@ -573,7 +581,7 @@ namespace XIVSlothCombo.Combos.PvE
                     if (IsEnabled(CustomComboPreset.SGE_AoE_Heal_EPrognosis) && LevelChecked(Eukrasia) &&
                         (IsEnabled(CustomComboPreset.SGE_AoE_Heal_EPrognosis_IgnoreShield) ||
                          FindEffect(Buffs.EukrasianPrognosis) is null))
-                        return Eukrasia;
+                    return Eukrasia;
                 }
 
                 return actionID;
