@@ -1,0 +1,86 @@
+Subject: [PATCH] Weaving
+---
+Index: XIVSlothCombo/XIVSlothCombo.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
+--- a/XIVSlothCombo/XIVSlothCombo.cs	(revision e24fc263769ad3c78f3b703ca8905584a0f5412d)
++++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1728997406911)
+@@ -83,11 +83,26 @@
+                     Combos.JobHelpers.AST.AST_QuickTargetCards.SelectedRandomMember = null;
+                     Svc.Log.Debug($"Switched to job {value}");
+                     PvEFeatures.HasToOpenJob = true;
++                    weaveID.Clear();
+                 }
+                 jobID = value;
+             }
+         }
+ 
++        private static readonly List<uint> weaveID = [];
++
++        public static uint? WeaveID
++        {
++            get => weaveID.Count == 0 ? null : weaveID.LastOrDefault();
++            set
++            {
++                if (value != null)
++                {
++                    weaveID.Toggle((uint)value);
++                }
++            }
++        }
++
+         /// <summary> Initializes a new instance of the <see cref="XIVSlothCombo"/> class. </summary>
+         /// <param name="pluginInterface"> Dalamud plugin interface. </param>
+         public XIVSlothCombo(IDalamudPluginInterface pluginInterface)
+@@ -600,6 +615,17 @@
+                             break;
+                         }
+                     }
++                    
++                case "weave":
++                {
++                    if (uint.TryParse(argumentsParts[1], out var actionID))
++                    {
++                        WeaveID = actionID;
++                    }
++
++                    break;
++                }
++                
+                 default:
+                     ConfigWindow.IsOpen = !ConfigWindow.IsOpen;
+                     PvEFeatures.HasToOpenJob = true;
+Index: XIVSlothCombo/CustomCombo/CustomCombo.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/CustomCombo/CustomCombo.cs b/XIVSlothCombo/CustomCombo/CustomCombo.cs
+--- a/XIVSlothCombo/CustomCombo/CustomCombo.cs	(revision e24fc263769ad3c78f3b703ca8905584a0f5412d)
++++ b/XIVSlothCombo/CustomCombo/CustomCombo.cs	(date 1728997160373)
+@@ -67,7 +67,21 @@
+             if (resultingActionID == 0 || actionID == resultingActionID)
+                 return false;
+ 
+-            newActionID = resultingActionID;
++            if ((CanWeave(actionID) || !HasTarget()) && WeaveID != null)
++            {
++                if (JustUsed(WeaveID.Value) || !HasCharges(WeaveID.Value))
++                {
++                    WeaveID = WeaveID;
++                }
++                else
++                {
++                    newActionID = WeaveID.Value;
++                }
++            }
++            else
++            {
++                newActionID = resultingActionID;
++            }
+ 
+             return true;
+         }
