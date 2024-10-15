@@ -1,0 +1,24 @@
+Subject: [PATCH] - Deployment Tactics Added FeyIllumination, Protraction
+---
+Index: XIVSlothCombo/Combos/PvE/SCH.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/Combos/PvE/SCH.cs b/XIVSlothCombo/Combos/PvE/SCH.cs
+--- a/XIVSlothCombo/Combos/PvE/SCH.cs	(revision 18d28b94ef95163181180b2f8089dc8eef837b95)
++++ b/XIVSlothCombo/Combos/PvE/SCH.cs	(date 1728817949975)
+@@ -293,6 +293,13 @@
+             {
+                 if (actionID is DeploymentTactics && ActionReady(DeploymentTactics))
+                 {
++                    if (IsEnabled(CustomComboPreset.SCH_DeploymentTactics_Recitation) &&
++                        ActionReady(FeyIllumination) && HasPetPresent())
++                        return FeyIllumination;
++
++                    if (IsEnabled(CustomComboPreset.SCH_DeploymentTactics_Recitation) && ActionReady(Protraction))
++                        return Protraction;
++
+                     //Grab our target (Soft->Hard->Self)
+                     IGameObject? healTarget = GetHealTarget(Config.SCH_DeploymentTactics_Adv && Config.SCH_DeploymentTactics_UIMouseOver);
+ 
