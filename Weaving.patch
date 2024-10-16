@@ -1,14 +1,20 @@
-Subject: [PATCH] Weaving
----
 Index: XIVSlothCombo/XIVSlothCombo.cs
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
---- a/XIVSlothCombo/XIVSlothCombo.cs	(revision e24fc263769ad3c78f3b703ca8905584a0f5412d)
-+++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1728997406911)
-@@ -83,11 +83,26 @@
+--- a/XIVSlothCombo/XIVSlothCombo.cs	(revision e85285f40450230d83a3d20466865f71cfd4cc4a)
++++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1729052905746)
+@@ -16,6 +16,7 @@
+ using System.Net.Http;
+ using System.Reflection;
+ using System.Threading.Tasks;
++using ECommons.ChatMethods;
+ using XIVSlothCombo.Attributes;
+ using XIVSlothCombo.Combos;
+ using XIVSlothCombo.Combos.PvE;
+@@ -83,11 +84,30 @@
                      Combos.JobHelpers.AST.AST_QuickTargetCards.SelectedRandomMember = null;
                      Svc.Log.Debug($"Switched to job {value}");
                      PvEFeatures.HasToOpenJob = true;
@@ -25,17 +31,21 @@ diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
 +            get => weaveID.Count == 0 ? null : weaveID.LastOrDefault();
 +            set
 +            {
-+                if (value != null)
-+                {
-+                    weaveID.Toggle((uint)value);
-+                }
++                if (value == null) return;
++                weaveID.Toggle((uint)value);
++                Svc.Chat.Print(new SeStringBuilder()
++                    .AddUiForeground(
++                        weaveID.Contains((uint)value) ? "Queue" : "Remove",
++                        weaveID.Contains((uint)value) ? (ushort)UIColor.Green : (ushort)UIColor.Red)
++                    .Append($" {ActionWatching.GetActionName((uint)value)}")
++                    .Build());
 +            }
 +        }
 +
          /// <summary> Initializes a new instance of the <see cref="XIVSlothCombo"/> class. </summary>
          /// <param name="pluginInterface"> Dalamud plugin interface. </param>
          public XIVSlothCombo(IDalamudPluginInterface pluginInterface)
-@@ -600,6 +615,17 @@
+@@ -600,6 +620,17 @@
                              break;
                          }
                      }
@@ -53,34 +63,3 @@ diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
                  default:
                      ConfigWindow.IsOpen = !ConfigWindow.IsOpen;
                      PvEFeatures.HasToOpenJob = true;
-Index: XIVSlothCombo/CustomCombo/CustomCombo.cs
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/XIVSlothCombo/CustomCombo/CustomCombo.cs b/XIVSlothCombo/CustomCombo/CustomCombo.cs
---- a/XIVSlothCombo/CustomCombo/CustomCombo.cs	(revision e24fc263769ad3c78f3b703ca8905584a0f5412d)
-+++ b/XIVSlothCombo/CustomCombo/CustomCombo.cs	(date 1728997160373)
-@@ -67,7 +67,21 @@
-             if (resultingActionID == 0 || actionID == resultingActionID)
-                 return false;
- 
--            newActionID = resultingActionID;
-+            if ((CanWeave(actionID) || !HasTarget()) && WeaveID != null)
-+            {
-+                if (JustUsed(WeaveID.Value) || !HasCharges(WeaveID.Value))
-+                {
-+                    WeaveID = WeaveID;
-+                }
-+                else
-+                {
-+                    newActionID = WeaveID.Value;
-+                }
-+            }
-+            else
-+            {
-+                newActionID = resultingActionID;
-+            }
- 
-             return true;
-         }
