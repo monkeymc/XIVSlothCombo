@@ -1,11 +1,13 @@
+Subject: [PATCH] Weaving Patch file III
+---
 Index: XIVSlothCombo/XIVSlothCombo.cs
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
 diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
---- a/XIVSlothCombo/XIVSlothCombo.cs	(revision e85285f40450230d83a3d20466865f71cfd4cc4a)
-+++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1729052905746)
+--- a/XIVSlothCombo/XIVSlothCombo.cs	(revision 9ab73d98030edacfb5da7b43439f71595f8722aa)
++++ b/XIVSlothCombo/XIVSlothCombo.cs	(date 1729053457847)
 @@ -16,6 +16,7 @@
  using System.Net.Http;
  using System.Reflection;
@@ -63,3 +65,35 @@ diff --git a/XIVSlothCombo/XIVSlothCombo.cs b/XIVSlothCombo/XIVSlothCombo.cs
                  default:
                      ConfigWindow.IsOpen = !ConfigWindow.IsOpen;
                      PvEFeatures.HasToOpenJob = true;
+Index: XIVSlothCombo/CustomCombo/CustomCombo.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/XIVSlothCombo/CustomCombo/CustomCombo.cs b/XIVSlothCombo/CustomCombo/CustomCombo.cs
+--- a/XIVSlothCombo/CustomCombo/CustomCombo.cs	(revision 9ab73d98030edacfb5da7b43439f71595f8722aa)
++++ b/XIVSlothCombo/CustomCombo/CustomCombo.cs	(date 1729053411499)
+@@ -61,7 +61,22 @@
+                 JobID != classJobID && ClassID != classJobID)
+                 return false;
+ 
+-            uint resultingActionID = Invoke(actionID, lastComboMove, comboTime, level);
++            uint resultingActionID = 0;
++            if ((CanWeave(actionID) || !HasTarget()) && WeaveID != null)
++            {
++                if (JustUsed(WeaveID.Value) || !HasCharges(WeaveID.Value))
++                {
++                    WeaveID = WeaveID;
++                }
++                else
++                {
++                    resultingActionID = WeaveID.Value;
++                }
++            }
++            else
++            {
++                resultingActionID = Invoke(actionID, lastComboMove, comboTime, level);
++            }
+             //Dalamud.Logging.PluginLog.Debug(resultingActionID.ToString());
+ 
+             if (resultingActionID == 0 || actionID == resultingActionID)
